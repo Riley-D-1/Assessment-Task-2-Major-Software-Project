@@ -1,0 +1,28 @@
+#game_win_start_btn{
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 60px;
+  color: #f7ba47;
+  background-color: #ffffff;
+  border: none;
+  text-align: center;
+  line-height: 80px;
+  cursor: pointer;
+}
+body{
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 20px;
+    color: #f7ba47;
+    background-color: #497425;
+    border: none;
+    text-align: left;
+    line-height: 80px;
+}
+h1,h2,h3,h4{
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 50px;
+    color: #f7ba47;
+    background-color: #497425;
+    border: none;
+    text-align: center;
+    line-height: 80px;
+}
