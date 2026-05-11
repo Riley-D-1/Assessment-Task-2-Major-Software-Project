@@ -37,6 +37,13 @@ function start_game(){
     
 }
 
+function ski_calculate(){
+
+}
+
+function ski_draw(){
+
+}
 
 function end_screen(){
     
@@ -45,5 +52,16 @@ function end_screen(){
 function end_game(){
 
 }
+function play_music(stage){
+	if (stage === "game"){
+    	const audio = new Audio('../../music/assets.ogg')
+	}else{
+    	const audio = new Audio('../../music/assets.ogg')
+	}
+    audio.play()
+}
 
 // Game Loop
+function main(){
+
+}
