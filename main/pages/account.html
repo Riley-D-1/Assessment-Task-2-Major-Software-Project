@@ -1,0 +1,24 @@
+<html>
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!--The title of the window in the browser -->
+    <title>Account</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="scripts/supabase.js"></script>
+    <!--The font are imported from google here (using google fonts website to auto generate this chunk of code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!--import the script here-->
+    <script src="scripts/account.js"></script>
+    <!--import the stylesheet here-->
+    <link rel="stylesheet" href="styles/account.css">
+</head>
+<body>
+    <h1>Account Page</h1>
+    <p>This is the account page, you can view your account details here and change them if you want to</p>
+    <button onclick="window.location.href='signin.html'">Sign Out</button>
+    <button onclick="window.location.href='signin.html'">Sign In</button>
+    <button onclick="anon_sign_in()">Anonymous Sign In*</button>
+    <p>   *No data will be saved and all progress lost upon closing window.</p>
+</body>
+</html>

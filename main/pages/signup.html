@@ -5,12 +5,14 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <!--The title of the window in the browser -->
     <title>Sign Up</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src='scripts/supabase.js'></script>
     <!--The font are imported from google here (using google fonts website to auto generate this chunk of code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <!--This provides a direct link to the stylesheet -->
-    <link rel='stylesheet' href='styles/signup.css'>
+    <link rel='stylesheet' href='styles/sign.css'>
 </head>
 <body>
     <!-- The div class for CSS selection and readibility-->
@@ -27,11 +29,6 @@
         <br>
         <input id = "email" placeholder = "example@mail.com">
         <br><br>
-        Date Of Birth:
-        <br>
-        <!-- The type specifies that it's a date input-->
-        <input id = "DOB" type ="date">
-        <br><br>
         <!-- The div that holds the infomation about the below (whether it passes or not)-->
         <div id = "password_info">Password:</div>
         <input type="password" id="password" placeholder="SecurePassword123" oninput="password_info_check()">
@@ -43,5 +40,5 @@
     </div>
 </body>
 <!--Has to be below in order to find the values of the html-->
-<script src='signup.js'></script>
+<script src='scripts/signup.js'></script>
 </html>

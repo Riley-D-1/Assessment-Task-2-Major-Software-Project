@@ -1,0 +1,64 @@
+/*The entirety of the content visible on the HTML document is the in the selector body */
+body{
+    /*Set a min height in order for the box to be better spaced */
+    min-height: 88vh;
+    /*Set the display type to flex, to make the elements flexbox for css styling */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /*Set the font to the imported font from google fonts "Inter" */
+    font-family: "Inter", sans-serif;
+}
+/*Applies to the div and overules the above as it is more specific*/
+.signup{
+    /*Max width and width*/
+    max-width: 430px;
+    width: 50%;
+    /*Padding*/
+    padding: 35px;
+    /*Rounding the edges of the border*/
+    border-radius: 6px;
+    /*Shadows to make it a nicer transition between black and white*/
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    /*Border*/
+    border: 1px solid black;
+    /*Alligning the text inside to the left*/
+    text-align: left;
+}
+/*All input elelemnts are selected*/
+input{
+    /*Ensuring that theu take the full*/
+    width: 100%;
+    /*Rounding the input boxes*/
+    border-radius: 10px;
+    /*Input padding*/
+    padding: 10px;
+    /*Setting a border*/
+    border: 1px solid #000000;
+}
+/*Applies only to the password toggle and overules others as it is more specific*/
+#password_show_toggle{
+    /*Making it so that it reverts back to its default instead of 100% width which breaks the text down a line and stretches the checkbox element*/
+    width: auto;
+}
+/*Applies only to the submit button and overules others as it is more specific*/
+#submit_form{
+    /*Rounding the button*/
+    border-radius: 10px;
+    /*Removing the border (rounding still applies)*/
+    border:none;
+    /*Setting the width of the button to take up all available space*/
+    width: 100%;
+    /*Setting the button padding*/
+    padding:20px;
+    /*Setting the background colour*/
+    background-color: rgb(0, 0, 0);
+    /*Setting the text colour*/
+    color:white;
+    /*Centering the button*/
+    align-content: center;
+}
+h2{
+    /*Centering the heading*/
+    text-align: center;
+}

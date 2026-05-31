@@ -16,26 +16,23 @@ function email_test(email){
     // It ensures the format of the email follows this : "____@__.__"
 }
 
-function check(){
+async function check(){
     // This firstly checks that the email contains a .com and an @ symbol
     let name_ = document.getElementById("name_").value
-    let dob = document.getElementById("DOB").value
     let password = document.getElementById("password").value
     let email = document.getElementById("email").value
     console.log(email_test(email))
     // It also checks that the password includes by using the exisisting password testing function
     // The operand && will return true only if all values are true
     if (email_test(email) === true && password_test(password) === true){
-        // Debugging statement
-        console.log("All valid values")
-        alert("Redirecting to results page")
-        // Saves the infomation to local storage to display back to user on results page
-        localStorage.setItem("Name",name_)
-        localStorage.setItem("Email",email)
-        localStorage.setItem("Password",password)
-        localStorage.setItem("DOB",dob)
-        // You redirect here
-        window.location.href = "results.html"
+        try {
+            await sign_up(email, password)
+            console.log("All valid values")
+            window.location.href = "results.html"
+        } catch (error) {
+            console.error(error)
+            alert("Sign-up failed. Please check your email and password.")
+        }
     }else{
         // Alerts the user
         alert("A problem has occured, please ensure all values are valid.")

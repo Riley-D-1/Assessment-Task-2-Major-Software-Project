@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--The viewport is important as it helps with responsive html design-->
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!--The title of the window in the browser -->
+    <title>Sign Up</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="scripts/supabase.js"></script>
+    <!--The font are imported from google here (using google fonts website to auto generate this chunk of code) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <!--This provides a direct link to the stylesheet -->
+    <link rel='stylesheet' href='styles/sign.css'>
+</head>
+<body>
+    <!-- The div class for CSS selection and readibility-->
+    <div class = "signup">
+        <h2>Signup Form</h2>
+        <br>
+        Username:
+        <br>
+        <!-- The id allows me to find it using JS selectors-->
+        <!-- The placeholder is a greyed out placeholder that provides the user with an idea of what to put in the box-->
+        <input id = "name_" placeholder = "John_Citizen">
+        <br><br>
+        <!-- The div that holds the infomation about the below (whether it passes or not)-->
+        <div id = "password_info">Password:</div>
+        <input type="password" id="password" placeholder="SecurePassword123" >
+        <br>
+        <input type="checkbox" id = "password_show_toggle" onclick="show_password_toggle()">Show Password
+        <br><br><br>
+        <!-- The submit button for the form-->
+        <button id = "submit_form" type = "submit" onclick = "check()">Submit</button>
+    </div>
+</body>
+<!--Has to be below in order to find the values of the html-->
+<script src='scripts/siginn.js'></script>
+</html>
