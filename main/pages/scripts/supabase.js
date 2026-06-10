@@ -13,6 +13,8 @@ async function sign_up(email, password) {
   })
   if (error) {
     throw error;
+  }else if(error === null){
+
   }
   await supabaseClient.from('profiles').insert({ id: data.user.id });
   return data;

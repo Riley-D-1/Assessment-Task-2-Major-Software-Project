@@ -7,10 +7,20 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<script src="https://cdn.jsdelivr.net/gh/krasimir/gifler/gifler.min.js"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel = "stylesheet" href = "style.css">
+    <link rel = "stylesheet" href = "styles/main_style.css">
+	<script src = "scripts/main.js"></script>
 </head>
 <body>
-	<button id = "start_btn" onclick="main()">Start</button>
+	<audio id="menu_music" src="../assets/music/menu_music.mp3"></audio>
+	<button id = "start_btn" onclick="trail_test()">Start</button>
+	<div class="custom-dropdown">
+	<button class="dropdown-btn">Select an option</button>
+	<ul class="dropdown-list" style="display: none;">
+		<li data-value="val1"><img src="image1.png"></li>
+		<li data-value="val2"><img src="image2.png"></li>
+	</ul>
+	</div>
+
 	<canvas id="game_window" width = "window.innerWidth" height = "window.innerHeight"></canvas>
 </body>
 </html>
