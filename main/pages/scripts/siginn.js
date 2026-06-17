@@ -6,7 +6,8 @@ async function check(){
         window.location.href = "results.html"
     } catch (error) {
         console.error(error)
-        alert("Sign-in failed. Please check your email and password.")
+        alert("Sign-in failed. Please check your email and password. It also may be an issue with the server, if you think this is the case please open an issue on github.")
+
     }
 }
 

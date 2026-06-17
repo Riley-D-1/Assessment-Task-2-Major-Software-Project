@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang = "en">
 <head>
-    <meta name = "viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game</title>
+	<meta name = "viewport" content="width=device-width, initial-scale=1.0">
+	<title>Game</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<script src="https://cdn.jsdelivr.net/gh/krasimir/gifler/gifler.min.js"></script>
-	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel = "stylesheet" href = "styles/main_style.css">
-	<script src = "scripts/main.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jersey+10&family=Tiny5&display=swap" rel="stylesheet">
+	<link rel = "stylesheet" href = "styles/game.css">
 </head>
 <body>
 	<audio id="menu_music" src="../assets/music/menu_music.mp3"></audio>
-	<button id = "start_btn" onclick="trail_test()">Start</button>
-	<div class="custom-dropdown">
-	<button class="dropdown-btn">Select an option</button>
-	<ul class="dropdown-list" style="display: none;">
-		<li data-value="val1"><img src="image1.png"></li>
-		<li data-value="val2"><img src="image2.png"></li>
-	</ul>
-	</div>
-
-	<canvas id="game_window" width = "window.innerWidth" height = "window.innerHeight"></canvas>
+	<button id = "start_btn" onclick="end_screen_test()">Start</button>
+	<canvas id="game_window"></canvas>
 </body>
+<!--<script src = "scripts/supabase.js" defer></script>-->
+<script src = "scripts/main.js" defer></script>
 </html>
