@@ -1,6 +1,4 @@
 // Initialisation function
-
-
 function start_game(){
 	// Get username
 	username = sessionStorage.getItem("username")
@@ -23,12 +21,30 @@ function start_game(){
 		"main/assets/obstacles/tree_1_snow.png",
 		"main/assets/obstacles/tree_1.png",
 	];
-	const item_assets = [
-		"main/assets/items/heart.png",
-		"main/assets/items/coin.png",
+	const item_paths = [
+		"../assets/items/apple.png",
+		"../assets/items/chocolate_bar.png",
+		"../assets/items/coin.png",
+		"../assets/items/cola.png",
+		"../assets/items/cookie_bar.png",
+		"../assets/items/icicle.png",
+		"../assets/items/key.png",
+		"../assets/items/medkit.png",
+		"../assets/items/mini_snowman.png",
+		"../assets/items/muffin.png",
+		"../assets/items/orange_googles.png",
+		"../assets/items/pet_rock.png",
+		"../assets/items/pizza.png",
+		"../assets/items/purple_googles.png",
+		"../assets/items/sandwich.png",
+		"../assets/items/snowball.png",
 	];
+
+	item_dict
 }
 
+
+// General  Helpful Functions
 function resizeGameCanvas() {
 	// Resize canvas 
     const canvas = document.getElementById("game_window");
@@ -71,6 +87,7 @@ class Character{
 	}
 	
 }
+
 class obstacle{
 	constructor(postion,size_x,size_y) {
 		this.position = [0,0];
@@ -103,19 +120,24 @@ class life_item extends item{
   }
 }
 
-class Luck_item extends item{
+class luck_item extends item{
     constructor(rarity,description,icon_path) {
     super(rarity,description,icon_path);
   }
 }
 
-class Mobility_item extends item{
+class mobility_item extends item{
     constructor(rarity,description,icon_path) {
     super(rarity,description,icon_path);
   }
 }
 
 // Functions
+
+// General helpful functions
+//ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+// Menu functions
 function inbetween_menu(username,unlocked_items){
 	// Temp
 	canvas = document.getElementById("game_window")
@@ -149,14 +171,19 @@ function inbetween_menu(username,unlocked_items){
 
 	random_saying = ["Send it →", "Good Luck! →", "Have Fun! →", "Don't Crash! →", "Ski Fast! →", "Last Lap, Best Lap →", "Ride the chair →", "Drop in →", "Remember to have fun! →", "Ski you later! →"]
 	ctx.fillText(random_saying[Math.floor(Math.random() * random_saying.length)], canvas.width * 0.78+(canvas.width * 0.2/2),canvas.height * 0.85+(canvas.height * 0.1/2));
+
+
+
 	// Difficulty 
 	ctx.fillText("Difficulty", canvas.width * 0.005 + ( canvas.width * 0.125/2),canvas.height*0.03)
 	// Difficulty Selector
 	let selecrted_difficulty = null
+	let difficulty_rects = []
 	for (let i = 0; i < 3; i++) {		
 		ctx.beginPath();
 		// (x, y, width, height, radii)
 		ctx.roundRect(canvas.width * 0.005, canvas.height * 0.08 + i * (canvas.height * 0.12), canvas.width * 0.125, canvas.height * 0.08, canvas.width * 0.005);
+		difficulty_rects.push({ x: (canvas.width * 0.005), y: (canvas.height * 0.08 + i * (canvas.height * 0.12)), width: (canvas.width * 0.125), height: (canvas.height * 0.08) })
 		if(i === 0){
 			ctx.strokeStyle = '#2f9e44'
 			if (selecrted_difficulty == "bluebird" || selecrted_difficulty === null) {
@@ -235,7 +262,7 @@ function inbetween_menu(username,unlocked_items){
 		owned_items_url.push("../assets/items/locked_item.png")
 	}
 
-
+	item_grid = []
 	owned_items_url.forEach((url, index) => {
 		const img = new Image();
 		img.src = url;
@@ -244,63 +271,197 @@ function inbetween_menu(username,unlocked_items){
 			//Img,  X, Y, Image Width, Image Height
 			ctx.drawImage(img, (canvas.width * 0.7 + index % 4 * (canvas.width * 0.08)), (canvas.height * 0.12 +Math.floor(index / 4)*(canvas.height*0.15)), (canvas.width * 0.06), ( canvas.height * 0.14));
 			console.log(url)
+			item_grid.push({src: url, x: (canvas.width * 0.7 + index % 4 * (canvas.width * 0.08)), y: (canvas.height * 0.12 +Math.floor(index / 4)*(canvas.height*0.15)), width: (canvas.width * 0.06), height: ( canvas.height * 0.14) })
 		};
 	});
+	console.log(item_grid)
+	// Do corresponding click action
+	canvas.addEventListener('click', function(event) {
+		console.log("kachow")
+		const bounds = canvas.getBoundingClientRect();
+		for (let i = item_grid.length - 1; i >= 0; i--) {
+   		 	const item = item_grid[i];
+			if (
+			(event.clientX - bounds.left) >= item.x &&
+			(event.clientY - bounds.top) <= item.x + item.width &&
+			(event.clientY - bounds.top) >= item.y &&
+			(event.clientY - bounds.top) <= item.y + item.height
+			) {
+				alert(`Clicked inside ${item.src}`);
+				// Draw a rectangle around the item.
+				
+
+			}
+			
+		}
+		// Check clicks for 
+		for (let i = difficulty_rects.length - 1; i >= 0; i--){
+			if(
+			(event.clientX - bounds.left) >= difficulty_rects.x &&
+			(event.clientY - bounds.top) <= difficulty_rects.x + difficulty_rects.width &&
+			(event.clientY - bounds.top) >= difficulty_rects.y &&
+			(event.clientY - bounds.top) <= difficulty_rects.y + difficulty_rects.height	
+			)
+		}
+			
+		
+	});
+
 }
 
 function item_selection_menu(player_item_dict){
 	
+	// Temp
+	canvas = document.getElementById("game_window")
+	console.log(canvas)
+	ctx = canvas.getContext("2d")
+	
+
+
 	// Display the item selection menu, allowing the player to choose which items to 
 
 	//Draw a grey round rectangle as the background for the item selection menu
 	// It will leave a border around the edge of the canvas (to see score and the items) and be centered 
-	ctx.fillStyle = "lightgrey";
-	ctx.lineWidth = 2;
+	ctx.fillStyle = "#343a40";
+	ctx.font = '40px "Jersey 10"';
 	ctx.beginPath();
 	ctx.roundRect(canvas.width * 0.05, canvas.height * 0.05, canvas.width * 0.9, canvas.height * 0.9, 20);
-	ctx.stroke();
+	ctx.fill();
 	// Display the 2 potential items and their descriptions, rarity and icons
-	// Display text to display the skip option, what to press to fill the slot and the OR seperator to make it clear to the user that its a choice.
-	let item_rarity = item_dict[0].fetch_rarity()
-	if (item_rarity == "Common"){
-		ctx.fillStyle = "ced4da"; // Grey
-	}else if (item_rarity == "Rare"){
-		ctx.fillStyle = "228be6"; // Blue	
-	}else if (item_rarity == "Epic"){
-		ctx.fillStyle = "be4bdb"; // Purple ish
-	}else if (item_rarity == "Legendary"){
-		ctx.fillStyle = "f08c00"; // Orange
+	
+	for(let i;i<2;i++){
+		let random_num = Math.floor(Math.random() * items.length)
+		let item_rarity = item_dict[random_num].fetch_rarity()
+		if (item_rarity == "Common"){
+			ctx.fillStyle = "ced4da"; // Grey
+		}else if (item_rarity == "Rare"){
+			ctx.fillStyle = "228be6"; // Blue	
+		}else if (item_rarity == "Epic"){
+			ctx.fillStyle = "be4bdb"; // Purple ish
+		}
+		// Title and description
+		ctx.fillText(item_dict[random_num].fetch_description(),canvas.width / 4,canvas.height * 0.1)
+		ctx.fillText(item_dict[random_num].fetch_url(),canvas.width / 4, canvas.height * 0.1)
 	}
+	
 
-	ctx.font = "20px Arial";
+	// Display text to display the skip option, what to press to fill the slot and the OR seperator to make it clear to the user that its a choice.
+	
 	//
+	let random_slot_1 = Math.floor(Math.random() * 5)+1
+	let random_slot_2 = Math.floor(Math.random() * 5)+1
 	ctx.fillStyle = "white"; // Reset back to white for the info
-	ctx.fillText(`Press Q to fill slot ${Math.floor(Math.random() * 5)+1}`, canvas.width / 2, canvas.height * 0.1);
+	ctx.fillText(`Press Q to fill slot ${random_slot_1}`, canvas.width / 2, canvas.height * 0.1);
 	ctx.fillText("OR", canvas.width / 2, canvas.height * 0.5);
-	ctx.fillText(`Press E to fill slot ${Math.floor(Math.random() * 5)+1}`, canvas.width / 2, canvas.height * 0.9);
+	ctx.fillText(`Press E to fill slot ${random_slot_2}`, canvas.width / 2, canvas.height * 0.9);
 	ctx.fillText("Press L to Pass",canvas.width / 2, canvas.height * 0.8)
+	window.addEventListener('keydown', (event) => {
+		if (event.key === 'Q') {
+			
+		}else if (event.key === 'E') {
+
+		}else if (event.key === 'L') {
+			//continue
+			// Go back to the core gameplay
+			
+		}
+	});
+
+}
+
+function end_screen(score_,){
+	canvas = document.getElementById("game_window")
+	ctx = canvas.getContext("2d")
+	ctx.globalAlpha =1;
+	ctx.imageSmoothingEnabled = false;
+	ctx.textAlign = "center";
+	ctx.textBaseline = 'middle';
+
+	// Title font
+	ctx.font = "100px 'Jersey 10'";
+	ctx.fillStyle = "#e03131";
+	ctx.fillText("Game Over!", canvas.width / 2, canvas.height / 20);
+	// Regular font
+	ctx.font = "60px 'Jersey 10'";
+	ctx.fillStyle = "#ffffff";
+	ctx.strokeStyle = '#bbbbbb';
+	ctx.lineWidth = 4;
+	// Score, info + highscore Box 
+
+	// Score Rounded box
+	ctx.beginPath();
+	// X, y , width , height, rounding
+	ctx.roundRect(canvas.width * 0.5, canvas.height * 0.15, canvas.width * 0.49, canvas.height * 0.3, canvas.width * 0.015);
+	ctx.stroke()
+	ctx.closePath()
+
+	ctx.fillStyle = "#000000";
+	ctx.fillText("Stastics",canvas.width * 0.5+(canvas.width * 0.45/2),canvas.height * 0.2)
+
+	//temp scores and stats
+	let high_score_ = 1100
+	let obstacles_spawned = 2
+	let item_count = 1
+	// Statistics
+	ctx.font = "50px 'Jersey 10'";
+	ctx.textAlign = "left";
+	//+(canvas.width * 0.45/4)
+	ctx.fillText(`Score: ${score_}`, canvas.width * 0.8, canvas.height * 0.35);
+	ctx.fillText(`High Score: ${high_score_}`, canvas.width * 0.51, canvas.height * 0.35);
+	
+	ctx.fillText(`Obstacles Dodged: ${high_score_}`, canvas.width * 0.51, canvas.height * 0.25);
+	ctx.fillText(`Items: ${item_count}`, canvas.width * 0.8, canvas.height * 0.25);	
+
+
+	// Use a function to draw the item bar
+	//draw_item_bar(x,y)
+	ctx.textAlign = "center";
+	ctx.fillText("You've unlocked:",canvas.width * 0.69, canvas.height * 0.6)
+
+	// Draw all unlocked items from the run
+	// temp testing 
+	unlocked_items = [""]
+
+	//rectX+(rectWidt
+
+
 
 	
+	// Red Round Rectangle button (Return to menu)
+	ctx.strokeStyle = '#e03131';
+	ctx.fillStyle = "#e03131";
+	ctx.beginPath();
+
+	// X, y , width , height, rounding
+	ctx.roundRect(canvas.width * 0.78, canvas.height * 0.78, canvas.width * 0.2, canvas.height * 0.12, canvas.width * 0.015);
+	ctx.stroke()
+	ctx.closePath()
+	//rectX+(rectWidth/2),rectY+(rectHeight/2)
+	ctx.fillText("Main Menu", canvas.width * 0.78 +(canvas.width * 0.2 /2), canvas.height * 0.78+(canvas.height * 0.12/2));
+	const end_image = new Image();
+	end_image.src = "../assets/skis_end_screen.png";
+	end_image.addEventListener("load", (e) => {
+		ctx.drawImage(end_image, canvas.width*0.001, canvas.height*0.12, canvas.width*0.4, canvas.height*0.95);
+	});
+
+	canvas.addEventListener('click', function(event) {
+	const bounds = canvas.getBoundingClientRect();
+
+	// Check for a collision
+	if (
+		(event.clientX - bounds.left) >= canvas.width * 0.78 &&
+		(event.clientY - bounds.top) <= canvas.width * 0.78 +  canvas.width * 0.2 &&
+		(event.clientY - bounds.top) >= canvas.height * 0.78 &&
+		(event.clientY - bounds.top) <= canvas.height * 0.78 + canvas.height * 0.12
+		) {
+		alert("Clicked inside:");
+		// Perform your custom action here
+		}
+	});
 }
 
-
-function screen_draw(){
-	background_color = "#dde7f0"
-	ctx.fillStyle = background_color;
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	for (let obstacle of obstacles_array) {
-		img = new Image();
-		img.src = "main/assets/obstacle.png";
-		ctx.drawImage(img, obstacle.x, obstacle.y, 10, 10);
-	}
-}
-
-function ui_draw(score_, item_dict){
-	// Score
-	ctx.textAlign = "center";
-	ctx.fillStyle = "black";
-	ctx.font = "20px Arial";
-	ctx.fillText(`Score: ${score_}`, canvas.width - (canvas.width * 0.05), 30);
+// UI functions
+function draw_item_bar(item_dict){
 	// Items
 	// Draw a light grey round rectangle as the background for the item icons
 	ctx.fillStyle = "lightgrey";
@@ -315,6 +476,47 @@ function ui_draw(score_, item_dict){
 		ctx.drawImage(img, 10 + (i * 40), 10, 30, 30);
 	}
 }
+
+function ui_draw(score_, item_dict){
+
+	// Score
+	ctx.textAlign = "center";
+	ctx.fillStyle = "black";
+	ctx.font = "20px Arial";
+	ctx.fillText(`Score: ${score_}`, canvas.width - (canvas.width * 0.05), 30);
+	draw_item_bar(item_dict)
+}
+
+// Gameplay screens
+
+function screen_draw(){
+	background_color = "#dde7f0"
+	ctx.fillStyle = background_color;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	for (let obstacle of obstacles_array) {
+		img = new Image();
+		img.src = "main/assets/obstacle.png";
+		ctx.drawImage(img, obstacle.x, obstacle.y, 10, 10);
+	}
+}
+
+function item_select_game(){
+	// Temp 	
+	canvas = document.getElementById("game_window")
+	console.log(canvas)
+	ctx = canvas.getContext("2d")
+	ctx.beginPath()
+	ctx.roundRect(x,y,canvas.width*0.8,height*0.7,)
+	ctx.fill()
+	item_1 = items[Math.floor(Math.random() * items.length)]
+	item_2 = items[Math.floor(Math.random() * items.length)]
+	// Draw the images 
+
+}
+
+
+// Obstacle Functions
+
 
 function pick_obstacle_type(){
 	const types = []
@@ -350,6 +552,9 @@ function collision_detection(life_item_bool){
 	}
 }
 
+
+// Player Functions
+
 function player_sprite(){
 	if (player_angle == 90){
 		return "main/assets/character/front.png"
@@ -373,9 +578,6 @@ function ski_calculate(){
 	}
 }
 
-function draw_item_bar(){
-	console.log("temp")
-}
 
 function character_draw(x,y,width,height,current_sprite_dir,ctx){
 	const image = new Image();
@@ -394,62 +596,6 @@ function ski_draw(current_x,current_y,player_angle,ski_seperation){
 	ctx.fill();
 }
 
-function end_screen(score_,){
-	canvas = document.getElementById("game_window")
-	ctx = canvas.getContext("2d")
-	ctx.textAlign = "center";
-	ctx.textBaseline = 'middle';
-
-	// Title font
-	ctx.font = "100px 'Jersey 10'";
-	ctx.fillStyle = "#e03131";
-	ctx.fillText("Game Over!", canvas.width / 2, canvas.height / 20);
-	// Regular font
-	ctx.font = "60px 'Jersey 10'";
-	ctx.fillStyle = "#ffffff";
-	ctx.strokeStyle = '#ebebeb';
-	ctx.lineWidth = 4;
-	// Score, info + highscore Box 
-
-	// Score Rounded box
-	ctx.beginPath();
-	// X, y , width , height, rounding
-	ctx.roundRect(canvas.width * 0.78, canvas.height * 0.3, canvas.width * 0.2, canvas.height * 0.12, canvas.width * 0.015);
-	ctx.stroke()
-	ctx.closePath()
-	
-	ctx.fill()
-	// Use a function to draw the item bar
-	//draw_item_bar(x,y)
-	ctx.fillStyle = "#000000";
-	//ctx.fillText("You've unlocked:")
-
-	// Draw all unlocked items from the run
-	// temp testing 
-	unlocked_items = [""]
-
-	//rectX+(rectWidt
-
-
-
-	ctx.fillText(`Score: ${score_}`, canvas.width / 2, canvas.height / 20 + 50);
-	// Red Round Rectangle button (Return to menu)
-	ctx.strokeStyle = '#e03131';
-	ctx.fillStyle = "#e03131";
-	ctx.beginPath();
-
-	// X, y , width , height, rounding
-	ctx.roundRect(canvas.width * 0.78, canvas.height * 0.78, canvas.width * 0.2, canvas.height * 0.12, canvas.width * 0.015);
-	ctx.stroke()
-	ctx.closePath()
-	//rectX+(rectWidth/2),rectY+(rectHeight/2)
-	ctx.fillText("Main Menu", canvas.width * 0.78 +(canvas.width * 0.2 /2), canvas.height * 0.78+(canvas.height * 0.12/2));
-	const end_image = new Image();
-	end_image.src = "../assets/skis_end_screen.png";
-	end_image.addEventListener("load", (e) => {
-		ctx.drawImage(end_image, canvas.width*0.001, canvas.height*0.12, canvas.width*0.4, canvas.height*0.95);
-	});
-}
 
 function trail(previous_coords_array,new_coords){
    	let trail_radius = 1
@@ -470,6 +616,7 @@ function trail(previous_coords_array,new_coords){
 }
 }
 
+// Other Functions
 function end_game(player_item_dict, unlocked_items){
  	// Check for new items and save them to supabase, then return to inbetweenmenu
 	for (item_ in player_item_dict){
@@ -497,7 +644,11 @@ function main(){
 	
 }
 
+
+
+
 // Test Functions
+
 function run_test(){
 	// Setup logic here:
 
@@ -533,4 +684,8 @@ function obstacble_ui_test(){
 	ui_draw(100, test_item_dict)
 	obstacle_generator()
 
+}
+
+function  item_select_game_test(){
+	item_selection_menu({})
 }
