@@ -2,5 +2,4 @@
 
 
 Credit:
-https://codingartistweb.com/2022/12/snowfall-effect-canvas-javascript-project/ 
-(On title screen, to implement)
+Credit to https://www.aleksandrhovhannisyan.com/blog/javascript-game-loop/ for my usage of their efficent gameloop

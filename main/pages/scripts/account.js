@@ -8,14 +8,28 @@ function signup_redirect(){
     window.location.href = "signup.html"
 }
 function anon_sign_in(){
-    // This function is used to sign in the user anonymously, allowing them to play the game without creating an account.
-    // It calls the anonymous_sign_in function from the supabase.js file, which handles the actual sign-in process with Supabase.
-    try{
-        anonymous_sign_in()
-    }catch(error){
-        // Set local storage to all unlocked
-        set_local_storage("", error.message)
-    }
-
+    // This function is used to sign in the user anonymously, allowing them to play the game without creating an account/using supabase.
+    // Set local storage to all unlocked
+    sessionStorage.setItem("username", "Anonymous");
+    const all_items = [
+        "../assets/items/apple.png",
+        "../assets/items/chocolate_bar.png",
+        "../assets/items/coin.png",
+        "../assets/items/cola.png",
+        "../assets/items/cookie_bar.png",
+        "../assets/items/icicle.png",
+        "../assets/items/key.png",
+        "../assets/items/medkit.png",
+        "../assets/items/mini_snowman.png",
+        "../assets/items/muffin.png",
+        "../assets/items/orange_googles.png",
+        "../assets/items/pet_rock.png",
+        "../assets/items/pizza.png",
+        "../assets/items/purple_googles.png",
+        "../assets/items/sandwich.png",
+        "../assets/items/snowball.png",
+    ];
+    sessionStorage.setItem("unlocked_items",JSON.stringify(all_items) )
+    window.location.href = "game.html"
 
 }

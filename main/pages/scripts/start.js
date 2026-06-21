@@ -1,3 +1,4 @@
+// The start menu for my game, that contains the title screen
 function start_menu(){
     let audioCtx;
     document.addEventListener("click", () => {
@@ -31,6 +32,7 @@ function draw_start_menu(){
         console.log("Title image loaded and drawn");
     };
 }
+// Draw the start menu  upon loading
 document.addEventListener("DOMContentLoaded", (event) => {
     draw_start_menu();
 });

@@ -31,7 +31,7 @@ async function check(){
             window.location.href = "results.html"
         } catch (error) {
             console.error(error)
-            alert("Sign-up failed. Please check your email and password.")
+            alert("Sign-up failed. Please check your email and password. It may also be an issue with the server.")
         }
     }else{
         // Alerts the user
