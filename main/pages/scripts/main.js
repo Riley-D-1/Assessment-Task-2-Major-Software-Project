@@ -6,127 +6,23 @@
 // previous_coords_array.unshift(starting_pos)
 
 // Import from other files
-import { inbetween_menu, play_menu_music } from "./ui.js";
-import {} from "./game_logic.js";
+import { inbetween_menu, play_menu_music, handleMenuClick } from "./ui.js";
+import { item_selection_menu, move_obstacles, handle_spawning, screen_draw } from "./game_logic.js";
+import { Character } from "./classes.js";
 
-
-// INITIALISATION 
-
-// Fetch user data 
-let username = sessionStorage.getItem("username")
-let unlocked_items = JSON.parse(sessionStorage.getItem('unlocked_items'));
-// Asset lists
-const obstacle_assets = [
-	"main/assets/obstacles/big_tree_1.png",
-	"main/assets/obstacles/big_tree_2.png",
-	"main/assets/obstacles/bush_1.png",
-	"main/assets/obstacles/bush_2.png",
-	"main/assets/obstacles/log_1.png",
-	"main/assets/obstacles/log_2.png",
-	"main/assets/obstacles/rock_1.png",
-	"main/assets/obstacles/rock_2.png",
-	"main/assets/obstacles/small_tree.png",
-	"main/assets/obstacles/snow_small_tree.png",
-	"main/assets/obstacles/snowman.png",
-	"main/assets/obstacles/stump.png",
-	"main/assets/obstacles/tree_1_snow.png",
-	"main/assets/obstacles/tree_1.png",
-];
-
-const item_paths = [
-	"../assets/items/apple.png",
-	"../assets/items/chocolate_bar.png",
-	"../assets/items/coin.png",
-	"../assets/items/cola.png",
-	"../assets/items/cookie_bar.png",
-	"../assets/items/icicle.png",
-	"../assets/items/key.png",
-	"../assets/items/medkit.png",
-	"../assets/items/mini_snowman.png",
-	"../assets/items/muffin.png",
-	"../assets/items/orange_googles.png",
-	"../assets/items/pet_rock.png",
-	"../assets/items/pizza.png",
-	"../assets/items/purple_googles.png",
-	"../assets/items/sandwich.png",
-	"../assets/items/snowball.png",
-];
-
-// Classes
-class Character{
-    constructor(character_angle,speed,item_dict,score) {
-		this.position = [0,0];
-		this.character_angle = direction;
-		this.y_speed = speed;
-		this.x_speed = x_speed
-		this.item_dict = item_dict;
-		this.score = score
-  	}
-	update_speed(updated_speed){
-		this.speed= updated_speed
-	}
-	get_speed(){
-	return this.speed
-	}
-	add_item(item){
-		this.item_dict.push(item)
-	}
-	
-}
-
-class Obstacle{
-	constructor(postion_x,postion_y,src,size_x,size_y) {
-		this.position = [postion_x,postion_y];
-		this.size_x =  size_x
-		this.size_y = size_y
-		this.src = src
-  	}
-}
-
-class item{
-    constructor(rarity,description,icon_path) {
-    this.rarity = rarity;
-    this.description = description;	
-    this.icon_path = icon_path;
-  }
-  fetch_description(){
-	return this.description
-  }
-  fetch_rarity(){
-	return this.rarity
-  }
-  fetch_icon(){
-	return this.icon_path
-  }
-
-}
-
-class life_item extends item{
-    constructor(rarity,description,icon_path) {
-    super(rarity,description,icon_path);
-  }
-  abillity() {
-	
-  }
-}
-
-class luck_item extends item{
-    constructor(rarity,description,icon_path) {
-    super(rarity,description,icon_path);
-  }
-	abillity() {
-	
-  }
-}
-
-class mobility_item extends item{
-    constructor(rarity,description,icon_path) {
-    super(rarity,description,icon_path);
-  }
-  mobility_item_effect(){
-
-  }
-}
+let game_state = "menu";
+let difficulty = "bluebird";
+let starting_item = null;
+let menu_vars = null;
+let canvas = null;
+let ctx = null;
+let username = "";
+let unlocked_items = [];
+let player = null;
+let previousTimeMs = 0;
+const MAX_FPS = 60;
+const FRAME_INTERVAL_MS = 1000 / MAX_FPS;
+const pressedKeys = new Set();
 
 // On load function (Runs the core game on load)
 
@@ -169,41 +65,113 @@ function end_game(player_item_dict, unlocked_items){
 
 // GAME LOOP
 
-function update() {
-  requestAnimationFrame((currentTimeMs) => {
-    const deltaTimeMs = currentTimeMs - previousTimeMs;
-    if (deltaTimeMs >= FRAME_INTERVAL_MS) {
-		// Update physics here
-      	// Synchronize next frame to arrive on time
-      	previousTimeMs = currentTimeMs - (deltaTimeMs % FRAME_INTERVAL_MS);
-    }
+function update(currentTimeMs) {
+	/* The core recursive game loop for my game
+    Args:
+		currentTimeMs(Int): The browser timestamp in ms
+    Returns:
+        N/A
+	*/
+
+	const deltaTimeMs = currentTimeMs - previousTimeMs;
+	if (deltaTimeMs >= FRAME_INTERVAL_MS) {
+		// Update physics/logic here
+		if (game_state === "game") {
+			move_obstacles(player);
+			handle_spawning();
+		}
+		previousTimeMs = currentTimeMs - (deltaTimeMs % FRAME_INTERVAL_MS);
+	}
 
 	// Draw UI and Scene here
-
-
-	// Call the function inside to continue
-    update();
-  });
+	if (game_state === "menu") {
+		menu_vars = inbetween_menu(username, unlocked_items, difficulty, starting_item)
+		difficulty = menu_vars[0]
+		starting_item = menu_vars[0]
+		game_state_ = menu_vars[3]
+	} else if (game_state === "game") {
+		screen_draw()
+	} else if (game_state === "item_menu") {
+		item_selection_menu()
+	} else if (game_state === "end") {
+		end_game()
+		end_screen()
+	}
+	// Calls the loop recursively
+	requestAnimationFrame(update);
 }
 
 function main(){
+	/* The core for my game that calls the relevant game loop 
+    Args:
+		N/A
+    Returns:
+        N/A
+	*/
 	// Start getting everything ready
-	// Intilisation 
-	const pressedKeys = new Set();
+	// INITIALISATION 
+
+	canvas = document.getElementById("game_window")
+	ctx = canvas.getContext("2d")
+	canvas.addEventListener('click', handleCanvasClick);
+
+	// Fetch user data 
+	let username = sessionStorage.getItem("username")
+	let unlocked_items = JSON.parse(sessionStorage.getItem('unlocked_items'));
+
+	// Asset lists
+
+	const item_paths = [
+		"../assets/items/apple.png",
+		"../assets/items/chocolate_bar.png",
+		"../assets/items/coin.png",
+		"../assets/items/cola.png",
+		"../assets/items/medkit.png",
+		"../assets/items/mini_snowman.png",
+		"../assets/items/muffin.png",
+		"../assets/items/pet_rock.png",
+		"../assets/items/pizza.png",
+		"../assets/items/purple_googles.png",
+		"../assets/items/sandwich.png",
+		"../assets/items/snowball.png",
+	];
+
 	// Use the keys inside the physics function of the character 
 	const isKeyDown = (key) => pressedKeys.has(key);
-	document.addEventListener('keydown', (e) => pressedKeys.add(e.key));
+	document.addEventListener('keydown', handleGlobalKeydown);
 	document.addEventListener('keyup', (e) => pressedKeys.delete(e.key));
-	const MAX_FPS = 60;
-	const FRAME_INTERVAL_MS = 1000 / MAX_FPS;
-	let previousTimeMs = 0;
+	// Create the player object
+	player = new Character(0, {}, 0, canvas);
 
-	// Wait for fonts to load
+	// Wait for fonts to load then start the loop
 	document.fonts.ready.then(() => {
-		
-		menu_vars=inbetween_menu(username,unlocked_items)
-		difficulty = menu_vars[0]
-		starting_item = menu_vars[1]
+		previousTimeMs = performance.now();
+		requestAnimationFrame(update);
 	});
-	update()
+}
+
+function handle_input(e) {
+	pressedKeys.add(e.key);
+	if (game_state === "item_menu") {
+		handleItemMenuKey(e.key);
+	}
+	if (game_state === "game" && (e.key === 'Esc')) {
+		game_state = "end"
+	}
+}
+
+function handle_click(event) {
+	if (game_state === "menu") {
+		(event);
+	}
+}
+
+function handle_item_select(key) {
+	if (key === 'q' || key === 'Q') {
+		menu_action = 'Q';
+	} else if (key === 'e' || key === 'E') {
+		menu_action = 'E';
+	} else if (key === 'l' || key === 'L') {
+		menu_action = 'pass';
+	}
 }

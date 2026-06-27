@@ -1,7 +1,8 @@
 // This file contains all of the core game logic 
 
-
 // Audio related logic
+// Done
+
 function play_game_music(){
 	if (sessionStorage.getItem("audioReady")) {
 		audio.loop = false;
@@ -20,6 +21,8 @@ function play_game_music(){
 }
 
 // Obstacle Functions 
+
+// DONE
 function pick_obstacle(){
 	const canvas = document.getElementById("game_window");
 	canvas.height
@@ -42,10 +45,11 @@ function pick_obstacle(){
 	return obstacle_assets[Math.floor(Math.random() * obstacle_assets.length)];
 }
 
-function obstacle_generator(difficulty,score){
+//  done?
+function obstacle_generator(difficulty,score,player){
 	// Temp
-	canvas = document.getElementById("game_window")
-	ctx = canvas.getContext("2d")
+	// canvas = document.getElementById("game_window")
+	// ctx = canvas.getContext("2d")
 
 	// Randomly generate obstacles, that scale with score and difficulty, and then completes the checks to see if any bump into each other
 	let obstacle_count
@@ -60,18 +64,44 @@ function obstacle_generator(difficulty,score){
 		obstacle_count = Math.floor(Math.random()*(score*0.02)+1)
 	}
 	for (let i= 0;i < obstacle_count+1;i++){
-		Math.random() * (canvas.width - 50);
-		let obstacle = pick_obstacle()
-		let obstacle_X = Math.random()*canvas.width
-		let obstacle_Y = (Math.random()*canvas.height)+canvas.height
-		obstacles.push(new Obstacle(obstacle_X, obstacle_Y,obstacle.src,obstacle.width,obstacle.height));
+		let placed_object_bool = false
+		let attempts = 0
+		while (attempts === false && attempts < 50){
+			// Math.random() * (canvas.width - 50);
+			let obstacle = pick_obstacle()
+			let radius = Math.max(data.width, data.height) * 0.5
+			let obstacle_X = Math.random()*canvas.width
+			let obstacle_Y = (Math.random()*canvas.height)+canvas.height
+			let obstacle_colliosn = false
+
+			obstacles.forEach(obstacle_ =>{
+				let ob_c =check_obstacle_collion(loop_obstacle_.width,loop_obstacle_.height,obstacle.width,obstacle.height)
+				if (ob_c == true){
+					obstacle_colliosn = true
+					break
+				}
+			}) 
+			if (obstacle_colliosn = false){
+				obstacles.push(new Obstacle(obstacle_X, obstacle_Y,obstacle.src,obstacle.width,obstacle.height));
+			}
+		
+		}
+
 	}
 	console.log(obstacles)
 	return obstacles
 	
 }
 
-function collision_detection(life_item_bool){
+// Not done
+function obstacle_possible_maker(objects){
+	//Loop through the objects and delete any that are too close to each other using a circle radius of the characters size
+
+
+}
+
+// Undone
+function collision_detection(life_item_bool, obstacle){ 
 	if (player_x == obstacle_x && player_y == obstacle_y && life_item_bool == false){
 		return "dead"
 	}else if (player_x == obstacle_x && player_y == obstacle_y && life_item_bool == true){
@@ -79,7 +109,7 @@ function collision_detection(life_item_bool){
 		return "saved"
 	}
 }
-
+// Mostly done
 function item_selection_menu(player_item_dict){
 	/** Displays the item selection menu during the game (in the core game)
 
@@ -134,56 +164,60 @@ function item_selection_menu(player_item_dict){
 	ctx.fillText("OR", canvas.width / 2, canvas.height * 0.5);
 	ctx.fillText(`Press E to fill slot ${random_slot_2}`, canvas.width / 2, canvas.height * 0.9);
 	ctx.fillText("Press L to Pass",canvas.width / 2, canvas.height * 0.8)
-	window.addEventListener('keydown', (event) => {
-		if (event.key === 'Q') {
-			
-		}else if (event.key === 'E') {
 
-		}else if (event.key === 'L') {
-			//continue
-			// Go back to the core gameplay
-			
-		}
-	});
+	if (action === 'slotQ' || action === 'slotE' || action === 'pass') {
+		return { nextState: 'game' };
+	}
 
+	return { nextState: 'item_menu' };
 }
 
-function move_obstacles(){
+// Changed line of thinking for effiency, will instead move the screen for it to make relative sense
 
-	let index = 0
-	for(let i = obstacles_array.length; i >= 0; i--){
-		obstacles_array[i].y = obstacles_array[i].y-Character.get_speed()
-		obstacles_array[i].x = obstacles_array[i].x-Character.get_speed_x()
-		index+=1
-		if (obstacles_array[i].y > 0){
-			obstacles_array.splice(i,1)
-		}
-	} 
-	return new_obstacles_array
+export function handle_spawning() {
+    spawn_timer++;
+    if (spawn_timer > 600) { // every ~600 frames
+        obstacle_generator();
+        spawn_timer = 0;
+    }
 }
 
+export function handle_spawning(score) {
+    if (spawn_timer % 500) { // every ~100 frames
+        item_selection_menu()
+    }
+}
 
-
-
-
+function handle_canvas_click(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+	if (
+		(event.clientX - bounds.left) >= item.x &&
+		(event.clientX - bounds.left) <= item.x + item.width &&
+		(event.clientY - bounds.top) >= item.y &&
+		(event.clientY - bounds.top) <= item.y + item.height
+	) return "hit";
+}
 
 // Player Functions
 
 
-function player_sprite(){
-	if (player_angle == 90){
-		return "main/assets/character/front.png"
-	}else if (player_angle == 90){
-		return "main/assets/character/side_l.png"
-	}else if (player_angle == 90){
-		return "main/assets/character/side_r.png"
-	}else{
-		return "main/assets/character/front.png"
-	}
-}
+// function player_sprite(){
+// 	if (player_angle == 90){
+// 		return "main/assets/character/front.png"
+// 	}else if (player_angle == 90){
+// 		return "main/assets/character/side_l.png"
+// 	}else if (player_angle == 90){
+// 		return "main/assets/character/side_r.png"
+// 	}else{
+// 		return "main/assets/character/front.png"
+// 	}
+// }
 
-function ski_calculate(){
+function ski_gap_calculate(player){
 	// Fix ranges to relfect actual
+	player.get_angle()
 	if (player_angle == 90){
 		let ski_seperation = 0.1
 	}else if (player_angle == 180){
@@ -194,31 +228,48 @@ function ski_calculate(){
 }
 
 // Draw functions
-function screen_draw(obstacles){
+export function screen_draw(obstacles){
 	background_color = "#dde7f0"
 	ctx.fillStyle = background_color;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	for (let obstacle of obstacles_array) {
 		if (obstacle.y <= canvas.height){
-			console.log(Skipped)
+			console.log("Skipped")
 		}else{
 			img = new Image();
 			img.src = obstacle.src;
 			ctx.drawImage(img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 		}
 	}
+	ski_draw()
+
+}
+
+function move(player,key){
+	if (key === "A"){
+		player.angle-1
+	}
+	else if (key ==="D"){
+		player.angle+1
+	}
 
 }
 
 
-
 function ski_draw(current_x,current_y,player_angle,ski_seperation){
+	player.get
 	x = current_x
 	y = current_y
+	// Save current canvas
+	ctx.save(); 
 	ctx.beginPath();
-	ctx.rect((x - ski_seperation), y, 10, 2);
-	ctx.rect((x + ski_seperation), y, 10, 2);
+	// Rotate to player angle
+	ctx.rotate(Math.PI / player_angle); 
+	ctx.roundRect((x - ski_seperation), y, 10, 2);
+	ctx.roundRect((x + ski_seperation), y, 10, 2);
 	ctx.fill();
+	// Restore to unrotated state
+	ctx.restore()
 }
 
 

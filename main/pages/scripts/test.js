@@ -1,5 +1,7 @@
 // This file contains all of the test functions and practice tests for the game 
 import {inbetween_menu} from "./ui.js";
+import {Character} from "./classes.js";
+
 
 //These have to be here so the ui doesnt die
 // On load function (Runs the core game on load)
@@ -24,15 +26,26 @@ function resizeGameCanvas() {
 
 
 // Test functions
+
+function game_test(){
+
+}
+
 function trail_test(){
 	const mousePos = getMousePos(canvas, event);
+	let previous_coord_array = [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],[0,9],[0,10],[0,11],[0,12]]
 	trail(previous_coords_array, [mousePos.x, mousePos.y])
 	// Test the trail function by simulating a character movement and checking if the trail is drawn correctly.
 }
 
 
 function ski_test(){
-	/// Test the ski angle calcs and draw the skis 
+	let test_item_dict = [new item("Medkit","Common","main/assets/items/heart.png"), new item("Coin","Rare","main/assets/items/coin.png")]
+	// character_angle,item_dict,score
+	player = new Character(90,test_item_dict,99)
+	// Test the ski angle calcs and draw the skis 
+
+	ski_calculate()
 }
 
 function inbetween_menu_test(){
@@ -66,6 +79,7 @@ const test_button = document.getElementById('test_button');
 if (test_button) {
 	test_button.addEventListener('click', () => {
 		console.log('Button was pressed!');
-		inbetween_menu_test();
+		// Change as needed to whatever test function
+		ski_test()
 	});
 }

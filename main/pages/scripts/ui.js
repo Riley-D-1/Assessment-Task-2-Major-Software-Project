@@ -19,7 +19,7 @@ export function play_menu_music(){
 }
 
 
-export function inbetween_menu(username,unlocked_items){
+export function inbetween_menu(username,unlocked_items,menu_state){
 	/** Displays the inbetween menu (the pre game menu that isnt the title screen)
 
     Args:
@@ -165,18 +165,15 @@ export function inbetween_menu(username,unlocked_items){
 		};
 	})
 	console.log(item_grid)
+
 	// Do corresponding click action
-	canvas.addEventListener('click', function(event) {
-		console.log("kachow")
+	if (click =true){
+
+	}
 		const bounds = canvas.getBoundingClientRect();
 		for (let i = item_grid.length - 1; i >= 0; i--) {
    		 	const item = item_grid[i];
-			if (
-				(event.clientX - bounds.left) >= item.x &&
-				(event.clientX - bounds.left) <= item.x + item.width &&
-				(event.clientY - bounds.top) >= item.y &&
-				(event.clientY - bounds.top) <= item.y + item.height
-			)
+		
 			 {
 				alert(`Clicked inside ${item.src}`);
 				// Draw a rectangle around the item.
@@ -198,9 +195,14 @@ export function inbetween_menu(username,unlocked_items){
 		}
 			
 		
-	});
+};
+	starting_item = menu_vars[1]
+	return {
+		difficulty: selecrted_difficulty || "bluebird",
+		starting_item,
+		nextState: ""
+	};
 
-}
 
 
 function character_draw(x,y,width,height,current_sprite_dir,ctx){
@@ -298,20 +300,20 @@ function end_screen(score_,){
 		ctx.drawImage(end_image, canvas.width*0.001, canvas.height*0.12, canvas.width*0.4, canvas.height*0.95);
 	});
 
-	canvas.addEventListener('click', function(event) {
-	const bounds = canvas.getBoundingClientRect();
-
-	// Check for a collision
-	if (
-		(event.clientX - bounds.left) >= canvas.width * 0.78 &&
-		(event.clientY - bounds.top) <= canvas.width * 0.78 +  canvas.width * 0.2 &&
-		(event.clientY - bounds.top) >= canvas.height * 0.78 &&
-		(event.clientY - bounds.top) <= canvas.height * 0.78 + canvas.height * 0.12
-		) {
-		alert("Clicked inside:");
-		// Perform your custom action here
-		}
-	});
+	if (click === true){
+		const bounds = canvas.getBoundingClientRect();
+		// Check for a collision
+		if (
+			(event.clientX - bounds.left) >= canvas.width * 0.78 &&
+			(event.clientY - bounds.top) <= canvas.width * 0.78 +  canvas.width * 0.2 &&
+			(event.clientY - bounds.top) >= canvas.height * 0.78 &&
+			(event.clientY - bounds.top) <= canvas.height * 0.78 + canvas.height * 0.12
+			) {
+			alert("Clicked inside:");
+			window.href_location()
+			}
+	}
+	
 }
 
 function draw_item_bar(item_dict){
@@ -340,7 +342,6 @@ function ui_draw(score_, item_dict){
 	// grab canvas and ctx as usual
 	canvas = document.getElementById("game_window")
 	ctx = canvas.getContext("2d")
-	
 	// Score
 	ctx.font = '40px "Jersey 10"';
 	ctx.fillStyle = '#000000';
