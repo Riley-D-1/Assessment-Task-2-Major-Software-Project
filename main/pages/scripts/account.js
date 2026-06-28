@@ -22,10 +22,9 @@ function anon_sign_in(){
         "../assets/items/medkit.png",
         "../assets/items/mini_snowman.png",
         "../assets/items/muffin.png",
-        "../assets/items/orange_googles.png",
         "../assets/items/pet_rock.png",
         "../assets/items/pizza.png",
-        "../assets/items/purple_googles.png",
+        "../assets/items/goggles.png",
         "../assets/items/sandwich.png",
         "../assets/items/snowball.png",
     ];

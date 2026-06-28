@@ -1,29 +1,30 @@
 // This is the main file which links all of the logic together in an appropiate game loop
-
-
-// previous_coords_array = []
-// for(let i =0; i< 50 ;i++)
-// previous_coords_array.unshift(starting_pos)
-
 // Import from other files
-import { inbetween_menu, play_menu_music, handleMenuClick } from "./ui.js";
-import { item_selection_menu, move_obstacles, handle_spawning, screen_draw } from "./game_logic.js";
-import { Character } from "./classes.js";
+import { inbetween_menu, play_menu_music,end_screen,ui_draw } from "./ui.js";
+import { item_selection_menu, handle_spawning, screen_draw,move,trail ,character_draw,ski_calculate, ski_draw,check_obstacle_collion,collision_detection} from "./game_logic.js";
+import { Character,item } from "./classes.js";
 
 let game_state = "menu";
 let difficulty = "bluebird";
-let starting_item = null;
 let menu_vars = null;
 let canvas = null;
 let ctx = null;
-let username = "";
-let unlocked_items = [];
-let player = null;
+let username = sessionStorage.getItem("username");
+let camera = { x: 0, y: 0 }
+let obstacles = [];
+let loaded_obstacles = [];
+let trail_coords = [0,0];
+let spawn_timer = 0;
+// Get unlocked items from storage
+let unlocked_items = JSON.parse(sessionStorage.getItem("unlocked_items")) || ["../assets/items/medkit.png"];
 let previousTimeMs = 0;
 const MAX_FPS = 60;
 const FRAME_INTERVAL_MS = 1000 / MAX_FPS;
 const pressedKeys = new Set();
-
+let last_click = null;
+let starting_item = "../assets/items/medkit.png";
+//
+let player = new Character(90,unlocked_items,99)
 // On load function (Runs the core game on load)
 
 window.addEventListener("load", () => {
@@ -33,7 +34,47 @@ window.addEventListener("load", () => {
 	main()
 });
 
+
+window.addEventListener("keydown", (e) => {
+    pressedKeys.add(e.key);
+});
+
+window.addEventListener("keyup", (e) => {
+    pressedKeys.delete(e.key);
+});
+
+
 // General Functions
+
+function preload_obstacles(){
+	let obstacle_urls = [
+		"../assets/obstacles/big_tree_1.png",
+		"../assets/obstacles/big_tree_2.png",
+		"../assets/obstacles/bush_1.png",
+		"../assets/obstacles/bush_2.png",
+		"../assets/obstacles/log_1.png",
+		"../assets/obstacles/log_2.png",
+		"../assets/obstacles/rock_1.png",
+		"../assets/obstacles/rock_2.png",
+		"../assets/obstacles/sign_1.png",
+		"../assets/obstacles/sign_2.png",
+		"../assets/obstacles/small_tree.png",
+		"../assets/obstacles/snowman.png",
+		"../assets/obstacles/tree_1.png"
+	];
+	for (let ob of obstacle_urls){
+		const img = new Image();
+		console.log(ob)
+		img.src = ob;
+		img.onload = () => {
+			loaded_obstacles.push(img);
+		};
+		img.onerror= () => {
+			console.log("error loading image")
+			console.log(ob)
+		}
+	}
+}
 
 function resizeGameCanvas() {
 	// Resize canvas 
@@ -52,7 +93,7 @@ function end_game(player_item_dict, unlocked_items){
 	for (item_ in player_item_dict){
 		if (item_  in unlocked_items == False){
 			try{
-				await save_item("item")
+				//await save_item("item")
 			}catch(error){
 				console.log("Error saving unlocked item")
 			}
@@ -61,7 +102,6 @@ function end_game(player_item_dict, unlocked_items){
 		
 	}
 }
-
 
 // GAME LOOP
 
@@ -72,32 +112,54 @@ function update(currentTimeMs) {
     Returns:
         N/A
 	*/
-
+	// Clear 
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	const deltaTimeMs = currentTimeMs - previousTimeMs;
 	if (deltaTimeMs >= FRAME_INTERVAL_MS) {
 		// Update physics/logic here
 		if (game_state === "game") {
-			move_obstacles(player);
-			handle_spawning();
-		}
-		previousTimeMs = currentTimeMs - (deltaTimeMs % FRAME_INTERVAL_MS);
-	}
+			for (let key of pressedKeys) {
+					move(player, key, camera);
+				}
+				// Spawning
+				const newObstacles = handle_spawning(difficulty, player.score, player,loaded_obstacles);
+				obstacles.push(...newObstacles);
+				// Move obstacles
+				for (let obs of obstacles) {
+					obs.y -= player.base_speed;
+				}
+				// Collision check
+				for (let obs of obstacles) {
+					if (collision_detection(player, obs)) {
+						game_state = "end";
+					}
+				}
 
+				// Trail
+				trail_coords = trail(trail_coords, [canvas.width/2, canvas.height/2], camera);				
+			}
+			
+		}
+	previousTimeMs = currentTimeMs - (deltaTimeMs % FRAME_INTERVAL_MS);
 	// Draw UI and Scene here
-	if (game_state === "menu") {
-		menu_vars = inbetween_menu(username, unlocked_items, difficulty, starting_item)
-		difficulty = menu_vars[0]
-		starting_item = menu_vars[0]
-		game_state_ = menu_vars[3]
-	} else if (game_state === "game") {
-		screen_draw()
-	} else if (game_state === "item_menu") {
-		item_selection_menu()
-	} else if (game_state === "end") {
-		end_game()
-		end_screen()
-	}
-	// Calls the loop recursively
+	screen_draw(obstacles,loaded_obstacles, camera);
+	// Draw player
+	ski_draw(player.character_angle,ski_calculate(player),player.turn_velocity)
+	character_draw(player.return_sprite(), player.character_angle, ski_calculate(player));
+	
+
+	// Draw UI
+	//ui_draw(player.score, player.item_dict);
+
+	// } else if (game_state === "game") {
+	// 	// Calls the loop recursively
+	// 	screen_draw()
+	// 	requestAnimationFrame(update);
+	// } else if (game_state === "end") {
+	// 	end_game()
+	// 	end_screen()
+	// }
+	
 	requestAnimationFrame(update);
 }
 
@@ -113,7 +175,7 @@ function main(){
 
 	canvas = document.getElementById("game_window")
 	ctx = canvas.getContext("2d")
-	canvas.addEventListener('click', handleCanvasClick);
+	canvas.addEventListener('click', handle_click);
 
 	// Fetch user data 
 	let username = sessionStorage.getItem("username")
@@ -121,39 +183,24 @@ function main(){
 
 	// Asset lists
 
-	const item_paths = [
-		"../assets/items/apple.png",
-		"../assets/items/chocolate_bar.png",
-		"../assets/items/coin.png",
-		"../assets/items/cola.png",
-		"../assets/items/medkit.png",
-		"../assets/items/mini_snowman.png",
-		"../assets/items/muffin.png",
-		"../assets/items/pet_rock.png",
-		"../assets/items/pizza.png",
-		"../assets/items/purple_googles.png",
-		"../assets/items/sandwich.png",
-		"../assets/items/snowball.png",
-	];
-
+	preload_obstacles()
 	// Use the keys inside the physics function of the character 
-	const isKeyDown = (key) => pressedKeys.has(key);
-	document.addEventListener('keydown', handleGlobalKeydown);
-	document.addEventListener('keyup', (e) => pressedKeys.delete(e.key));
+	// const isKeyDown = (key) => pressedKeys.has(key);
+	// document.addEventListener('keydown', handleGlobalKeydown);
+	// document.addEventListener('keyup', (e) => pressedKeys.delete(e.key));
 	// Create the player object
-	player = new Character(0, {}, 0, canvas);
-
 	// Wait for fonts to load then start the loop
 	document.fonts.ready.then(() => {
-		previousTimeMs = performance.now();
-		requestAnimationFrame(update);
+		inbetween_menu(username, unlocked_items,difficulty,starting_item)
+		
+		// requestAnimationFrame(update);
 	});
 }
 
 function handle_input(e) {
 	pressedKeys.add(e.key);
 	if (game_state === "item_menu") {
-		handleItemMenuKey(e.key);
+		handle_item_select(e.key);
 	}
 	if (game_state === "game" && (e.key === 'Esc')) {
 		game_state = "end"
@@ -161,9 +208,32 @@ function handle_input(e) {
 }
 
 function handle_click(event) {
+    const rect = canvas.getBoundingClientRect();
+    window.last_click = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
 	if (game_state === "menu") {
-		(event);
+		const saved_difficulty = difficulty;
+		const saved_start_item = starting_item;
+		// G4rab the returned vals from the function
+		const menu_vars = inbetween_menu(username, unlocked_items, difficulty, starting_item);
+		difficulty = menu_vars.difficulty;
+		starting_item = menu_vars.starting_item;
+		game_state = menu_vars.game_state;
+		if (game_state === "game"){
+			player.add_item(starting_item)
+			update(previousTimeMs = performance.now(),player)
+		}
+		// Only redraw if something changed
+		if (saved_start_item != starting_item || saved_difficulty != difficulty){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		inbetween_menu(username, unlocked_items,difficulty,starting_item);
+		}
+	}else if(game_state === "end" ){
+
 	}
+	
 }
 
 function handle_item_select(key) {

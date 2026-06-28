@@ -1,5 +1,4 @@
 // This file contains Menu related logic and UI related logic for the game
-
 export function play_menu_music(){
 	/** Plays music in the menus.
 
@@ -19,7 +18,7 @@ export function play_menu_music(){
 }
 
 
-export function inbetween_menu(username,unlocked_items,menu_state){
+export function inbetween_menu(username,unlocked_items,difficulty,starting_item){
 	/** Displays the inbetween menu (the pre game menu that isnt the title screen)
 
     Args:
@@ -31,17 +30,13 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 		Difficulty (str)
 
 	*/
-
-
 	// Grab canvas and ctx to draw the menu on
 	let canvas = document.getElementById("game_window")
 	let ctx = canvas.getContext("2d")
-	
-	//Grab the unlocked items
-
-	// !
-	//const unlockedItems = await get_user_items()
-
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	let x = null;
+	let y = null;
+	let game_state_ = "menu"
 
 	// Font styling 
 	ctx.textAlign = "center";
@@ -49,7 +44,7 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 	ctx.fillStyle = '#000000';
 	ctx.textBaseline = 'middle';
 	// Draw the character
-	character_draw(canvas.width / 2-(canvas.width * 0.25), canvas.height * 0.06, canvas.width * 0.4, canvas.height * 0.9, "../../main/assets/character/front.png", ctx)
+	menu_character_draw(canvas.width / 2-(canvas.width * 0.25), canvas.height * 0.06, canvas.width * 0.4, canvas.height * 0.9, "../../main/assets/character/front.png", ctx)
 
 	ctx.fillText(username, canvas.width *.45, canvas.height * 0.9);
 	// Draw the button
@@ -64,15 +59,12 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 
 	// Add text to the button
 
-	let random_saying = ["Send it →", "Good Luck! →", "Have Fun! →", "Don't Crash! →", "Ski Fast! →", "Last Lap, Best Lap →", "Ride the chair →", "Drop in →", "Remember to have fun! →", "Ski you later! →"]
+	let random_saying = ["Send it →", "Good Luck! →", "Have Fun! →", "Don't Crash! →", "Ski Fast! →", "Last Lap, Best Lap →", "Ride the chair →", "Drop in →", "Ski you later!→"]
 	ctx.fillText(random_saying[Math.floor(Math.random() * random_saying.length)], canvas.width * 0.78+(canvas.width * 0.2/2),canvas.height * 0.85+(canvas.height * 0.1/2));
-
-
-
 	// Difficulty 
 	ctx.fillText("Difficulty", canvas.width * 0.005 + ( canvas.width * 0.125/2),canvas.height*0.03)
 	// Difficulty Selector
-	let selecrted_difficulty = null
+	let selecrted_difficulty = difficulty
 	let difficulty_rects = []
 	for (let i = 0; i < 3; i++) {		
 		ctx.beginPath();
@@ -81,21 +73,21 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 		difficulty_rects.push({ x: (canvas.width * 0.005), y: (canvas.height * 0.08 + i * (canvas.height * 0.12)), width: (canvas.width * 0.125), height: (canvas.height * 0.08) })
 		if(i === 0){
 			ctx.strokeStyle = '#2f9e44'
-			if (selecrted_difficulty == "bluebird" || selecrted_difficulty === null) {
+			if (selecrted_difficulty === "bluebird") {
 				ctx.fillStyle = '#b2f2bb';
 			}else{
 				ctx.fillStyle = '#ffffff'
 			}
 		}else if (i === 1){
 			ctx.strokeStyle = '#1971c2'
-			if (selecrted_difficulty == "flurry") {
+			if (selecrted_difficulty === "flurry") {
 				ctx.fillStyle = '#a5d8ff';
 			}else{
 				ctx.fillStyle = '#ffffff'
 			}
 		}else if (i === 2){
 			ctx.strokeStyle = '#000000';
-			if (selecrted_difficulty == "whiteout") {
+			if (selecrted_difficulty === "whiteout") {
 				ctx.fillStyle = '#868e96';
 			}else{
 				ctx.fillStyle = '#ffffff'
@@ -144,7 +136,7 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 		"../assets/items/muffin.png",
 		"../assets/items/pet_rock.png",
 		"../assets/items/pizza.png",
-		"../assets/items/purple_googles.png",
+		"../assets/items/goggles.png",
 		"../assets/items/sandwich.png",
 		"../assets/items/snowball.png",
 	];
@@ -156,56 +148,86 @@ export function inbetween_menu(username,unlocked_items,menu_state){
 	let item_grid = []
 	owned_items_url.forEach((url, index) => {
 		const img = new Image();
-		img.src = url;
-		img.onload = () => {
-			// Render the image onto the context
-			//Img,  X, Y, Image Width, Image Height
-			ctx.drawImage(img, (canvas.width * 0.759 + index % 3 * (canvas.width * 0.08)), (canvas.height * 0.12 + Math.floor(index / 3) * (canvas.height * 0.15)), (canvas.width * 0.06), (canvas.height * 0.14));
-			item_grid.push({src: url, x: (canvas.width * 0.76 + index % 3 * (canvas.width * 0.08)), y: (canvas.height * 0.12 + Math.floor(index / 3) * (canvas.height * 0.15)), width: (canvas.width * 0.06), height: (canvas.height * 0.14) })
+
+		let temp_item = {
+			src: url,
+			x: canvas.width * 0.76 + index % 3 * (canvas.width * 0.08),
+			y: canvas.height * 0.12 + Math.floor(index / 3) * (canvas.height * 0.15),
+			width: canvas.width * 0.06,
+			height: canvas.height * 0.14
 		};
-	})
-	console.log(item_grid)
 
+		item_grid.push(temp_item)
+
+		img.onload = () => {
+			ctx.drawImage(img, temp_item.x, temp_item.y, temp_item.width, temp_item.height);
+
+			if (starting_item === temp_item.src) {
+				ctx.lineWidth = 5;
+				ctx.strokeStyle = "#000000";
+				ctx.strokeRect(temp_item.x - 2, temp_item.y - 2, temp_item.width + 4, temp_item.height + 4);
+			}
+		};
+
+		img.src = url;
+	});
 	// Do corresponding click action
-	if (click =true){
-
-	}
-		const bounds = canvas.getBoundingClientRect();
+	if (window.last_click) {
+    	const { x, y } = window.last_click;
+		// For the item grid 
 		for (let i = item_grid.length - 1; i >= 0; i--) {
-   		 	const item = item_grid[i];
-		
-			 {
-				alert(`Clicked inside ${item.src}`);
-				// Draw a rectangle around the item.
-				
-
-			}
+			const item = item_grid[i];
+			if (
+				x >= item.x && x <= item.x + item.width &&
+       			y >= item.y && y <= item.y + item.height
+				)
+		 	{
+				console.log(`Clicked inside ${item.src}`);
+				// Save item
+				starting_item = item.src;
+				break;
 			
-		}
-		// Check clicks for 
-		for (let i = difficulty_rects.length - 1; i >= 0; i--){
-			if(
-			(event.clientX - bounds.left) >= difficulty_rects.x &&
-			(event.clientY - bounds.top) <= difficulty_rects.x + difficulty_rects.width &&
-			(event.clientY - bounds.top) >= difficulty_rects.y &&
-			(event.clientY - bounds.top) <= difficulty_rects.y + difficulty_rects.height	
-			){
-				console.log("filler")
 			}
 		}
-			
 		
-};
-	starting_item = menu_vars[1]
+		// For the difficulty rectangles
+		for (let i = 0; i < difficulty_rects.length; i++) {
+			const rect = difficulty_rects[i];
+			if (
+				x >= rect.x && x <= rect.x + rect.width &&
+				y >= rect.y && y <= rect.y + rect.height
+			) {
+				if (i === 0){
+					selecrted_difficulty = "bluebird";	
+				}else if (i === 1){
+					selecrted_difficulty = "flurry"
+				}else if (i === 2){
+					selecrted_difficulty = "whiteout"
+				}
+				console.log(`Difficulty ${selecrted_difficulty}`);
+			}
+		}
+		// X, y , width, height , radius
+		// (canvas.width * 0.78, canvas.height * 0.85, canvas.width * 0.2,(canvas.height * 0.1, canvas.width * 0.015)
+		// Start button
+		if (
+			x >= (canvas.width * 0.78) && x <= (canvas.width * 0.78) + (canvas.width * 0.2) &&
+			y >= (canvas.height * 0.85) && y <= (canvas.height * 0.85) + (canvas.height * 0.1)
+		) {
+			console.log("next state")
+			game_state_ = "game"
+		}
+	}
+	window.last_click = null;
 	return {
-		difficulty: selecrted_difficulty || "bluebird",
+		difficulty: selecrted_difficulty,
 		starting_item,
-		nextState: ""
+		game_state: game_state_
 	};
 
+}
 
-
-function character_draw(x,y,width,height,current_sprite_dir,ctx){
+function menu_character_draw(x,y,width,height,current_sprite_dir,ctx){
 	const image = new Image();
 	image.src = current_sprite_dir;
 	image.addEventListener("load", (e) => {
@@ -213,7 +235,7 @@ function character_draw(x,y,width,height,current_sprite_dir,ctx){
 	});	
 }
 
-function end_screen(score_,){
+export function end_screen(score_,){
 	/** Displays the end screen after death (in the core game)
 
     Args:
@@ -300,27 +322,26 @@ function end_screen(score_,){
 		ctx.drawImage(end_image, canvas.width*0.001, canvas.height*0.12, canvas.width*0.4, canvas.height*0.95);
 	});
 
-	if (click === true){
-		const bounds = canvas.getBoundingClientRect();
-		// Check for a collision
+	if (window.last_click) {
+		const { x, y } = window.last_click
 		if (
-			(event.clientX - bounds.left) >= canvas.width * 0.78 &&
-			(event.clientY - bounds.top) <= canvas.width * 0.78 +  canvas.width * 0.2 &&
-			(event.clientY - bounds.top) >= canvas.height * 0.78 &&
-			(event.clientY - bounds.top) <= canvas.height * 0.78 + canvas.height * 0.12
-			) {
-			alert("Clicked inside:");
-			window.href_location()
-			}
+			x >= (canvas.width * 0.78) &&
+			x <= (canvas.width * 0.78) + (canvas.width * 0.2) &&
+			y >= (canvas.height * 0.78) &&
+			y <= (canvas.height * 0.78) + (canvas.height * 0.12)
+		) {
+			window.location.href = "../pages/main_menu.html";
+		}
+
+		window.last_click = null;
 	}
 	
 }
 
-function draw_item_bar(item_dict){
+export function draw_item_bar(item_dict){
 	// Temp
-	canvas = document.getElementById("game_window")
-	console.log(canvas)
-	ctx = canvas.getContext("2d")
+	const canvas = document.getElementById("game_window");
+	let ctx = canvas.getContext("2d")
 	
 	// Items
 	// Draw a light grey round rectangle as the background for the item icons
@@ -338,10 +359,10 @@ function draw_item_bar(item_dict){
 	}
 }
 
-function ui_draw(score_, item_dict){
+export function ui_draw(score_, item_dict){
 	// grab canvas and ctx as usual
-	canvas = document.getElementById("game_window")
-	ctx = canvas.getContext("2d")
+	const canvas = document.getElementById("game_window");
+	let ctx = canvas.getContext("2d")
 	// Score
 	ctx.font = '40px "Jersey 10"';
 	ctx.fillStyle = '#000000';
