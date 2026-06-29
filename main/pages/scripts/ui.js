@@ -1,4 +1,5 @@
 // This file contains Menu related logic and UI related logic for the game
+import {item } from "./classes.js";
 export function play_menu_music(){
 	/** Plays music in the menus.
 
@@ -235,11 +236,13 @@ function menu_character_draw(x,y,width,height,current_sprite_dir,ctx){
 	});	
 }
 
-export function end_screen(score_,){
+export function end_screen(score_,item_dict,obstacle_dodged){
 	/** Displays the end screen after death (in the core game)
 
     Args:
 		score (int) :  The final score of the player
+		item_dict (dict) :  The items collected by the player
+		obstacle_dodged (int) :  The number of obstacles dodged by the player
 
     Returns:
         N/A
@@ -247,8 +250,8 @@ export function end_screen(score_,){
 
 
 	// Getting ctx and canvas to draw on
-	canvas = document.getElementById("game_window")
-	ctx = canvas.getContext("2d")
+	const canvas = document.getElementById("game_window");
+	let ctx = canvas.getContext("2d")
 
 	ctx.globalAlpha =1;
 	ctx.imageSmoothingEnabled = false;
@@ -277,33 +280,29 @@ export function end_screen(score_,){
 	ctx.fillText("Stastics",canvas.width * 0.5+(canvas.width * 0.45/2),canvas.height * 0.2)
 
 	//temp scores and stats
-	let high_score_ = 1100
-	let obstacles_spawned = 2
-	let item_count = 1
+	let high_score_ = parseInt(sessionStorage.getItem("high_score")) || 0;
+	let item_count = Object.keys(item_dict).length
 	// Statistics
 	ctx.font = "50px 'Jersey 10'";
 	ctx.textAlign = "left";
 	//+(canvas.width * 0.45/4)
 	ctx.fillText(`Score: ${score_}`, canvas.width * 0.8, canvas.height * 0.35);
 	ctx.fillText(`High Score: ${high_score_}`, canvas.width * 0.51, canvas.height * 0.35);
-	
-	ctx.fillText(`Obstacles Dodged: ${high_score_}`, canvas.width * 0.51, canvas.height * 0.25);
+	ctx.fillText(`Obstacles Dodged: ${obstacle_dodged}`, canvas.width * 0.51, canvas.height * 0.25);
 	ctx.fillText(`Items: ${item_count}`, canvas.width * 0.8, canvas.height * 0.25);	
 
-
-	// Use a function to draw the item bar
-	//draw_item_bar(x,y)
 	ctx.textAlign = "center";
 	ctx.fillText("You've unlocked:",canvas.width * 0.69, canvas.height * 0.6)
-
-	// Draw all unlocked items from the run
-	// temp testing 
-	unlocked_items = [""]
-
-	//rectX+(rectWidt
-
-
-
+	// Draw unlocked items
+	for (let i = 0; i < Math.min(item_dict.length, 5); i++) {
+		const item = item_dict[i];
+		const icon = new Image();
+		icon.src = item.fetch_icon();
+		const x = canvas.width * 0.75 + i * ((canvas.width * 0.5) / 5);
+		icon.onload = () => {
+			ctx.drawImage(icon, x, (canvas.height * 0.63), (canvas.width * 0.04), (canvas.width * 0.04));
+		};
+	}
 	
 	// Red Round Rectangle button (Return to menu)
 	ctx.strokeStyle = '#e03131';
@@ -320,25 +319,12 @@ export function end_screen(score_,){
 	end_image.src = "../assets/skis_end_screen.png";
 	end_image.addEventListener("load", (e) => {
 		ctx.drawImage(end_image, canvas.width*0.001, canvas.height*0.12, canvas.width*0.4, canvas.height*0.95);
+		console.log("end image loaded")
 	});
-
-	if (window.last_click) {
-		const { x, y } = window.last_click
-		if (
-			x >= (canvas.width * 0.78) &&
-			x <= (canvas.width * 0.78) + (canvas.width * 0.2) &&
-			y >= (canvas.height * 0.78) &&
-			y <= (canvas.height * 0.78) + (canvas.height * 0.12)
-		) {
-			window.location.href = "../pages/main_menu.html";
-		}
-
-		window.last_click = null;
-	}
 	
 }
 
-export function draw_item_bar(item_dict){
+export function draw_item_bar(item_dict,loaded_items){
 	// Temp
 	const canvas = document.getElementById("game_window");
 	let ctx = canvas.getContext("2d")
@@ -352,14 +338,13 @@ export function draw_item_bar(item_dict){
 	ctx.roundRect(canvas.width * 0.005, canvas.height*0.0012, canvas.width * 0.3, canvas.height*0.08, canvas.width*0.12);
 	ctx.stroke();
 	for (let i = 0; i < item_dict.length; i++) {
-		let item = item_dict[i];
-		let img = new Image();
-		img.src = item.fetch_icon();
-		ctx.drawImage(img, 10 + (i * 40), 10, 30, 30);
+			const item = item_dict[i];
+			const icon = loaded_items.find(img =>img.src.endsWith(item.icon_path.split('/').pop()));
+			ctx.drawImage(icon, canvas.width * 0.02 + (i * (canvas.width * 0.3 / 5)), canvas.height * 0.001, canvas.width * 0.3 / 7, canvas.width * 0.3 / 7);
 	}
 }
 
-export function ui_draw(score_, item_dict){
+export function ui_draw(score_, item_dict, loaded_items){
 	// grab canvas and ctx as usual
 	const canvas = document.getElementById("game_window");
 	let ctx = canvas.getContext("2d")
@@ -369,5 +354,5 @@ export function ui_draw(score_, item_dict){
 	ctx.textBaseline = 'middle';
 	ctx.textAlign = 'center';
 	ctx.fillText(`Score: ${score_}`, canvas.width - (canvas.width * 0.05), 30);
-	draw_item_bar(item_dict)
+	draw_item_bar(item_dict, loaded_items)
 }

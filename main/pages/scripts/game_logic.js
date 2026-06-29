@@ -43,24 +43,43 @@ function pick_obstacle(){
 	const canvas = document.getElementById("game_window");
 	canvas.height
 	const obstacle_assets = [
-		{ src: "main/assets/obstacles/big_tree_1.png", width: (canvas.width * 0.12), height: (canvas.height * 0.16) },
-		{ src: "main/assets/obstacles/big_tree_2.png", width: (canvas.width * 0.12), height: (canvas.height * 0.16) },
-		{ src: "main/assets/obstacles/bush_1.png", width: (canvas.width * 0.08), height: (canvas.height * 0.08) },
-		{ src: "main/assets/obstacles/bush_2.png", width: (canvas.width * 0.08), height: (canvas.height * 0.08 )},
-		{ src: "main/assets/obstacles/log_1.png", width: (canvas.width * 0.10), height: (canvas.height * 0.06) },
-		{ src: "main/assets/obstacles/log_2.png", width: (canvas.width * 0.10), height: (canvas.height * 0.06) },
-		{ src: "main/assets/obstacles/rock_1.png", width: (canvas.width * 0.06), height: (canvas.height * 0.05) },
-		{ src: "main/assets/obstacles/rocks_2.png", width: (canvas.width * 0.07), height: (canvas.height * 0.05) },
-		{ src: "main/assets/obstacles/sign_1.png", width: (canvas.width * 0.07), height: (canvas.height * 0.10) },
-		{ src: "main/assets/obstacles/sign_2.png", width: (canvas.width * 0.07), height: (canvas.height * 0.10) },
-		{ src: "main/assets/obstacles/small_tree.png", width: (canvas.width * 0.09), height: (canvas.height * 0.12) },
-		{ src: "main/assets/obstacles/snowman.png", width: (canvas.width * 0.08), height: (canvas.height * 0.12) },
-		{ src: "main/assets/obstacles/tree_1.png", width: (canvas.width * 0.12), height: (canvas.height * 0.17) },
+		{ src: "../assets/obstacles/big_tree_1.png", width: (canvas.width * 0.16), height: (canvas.height * 0.38) },
+		{ src: "../assets/obstacles/big_tree_2.png", width: (canvas.width * 0.15), height: (canvas.height * 0.36) },
+		{ src: "../assets/obstacles/bush_1.png", width: (canvas.width * 0.10), height: (canvas.height * 0.20) },
+		{ src: "../assets/obstacles/bush_2.png", width: (canvas.width * 0.11), height: (canvas.height * 0.21) },
+		{ src: "../assets/obstacles/log_1.png", width: (canvas.width * 0.16), height: (canvas.height * 0.18) },
+		{ src: "../assets/obstacles/log_2.png", width: (canvas.width * 0.15), height: (canvas.height * 0.17) },
+		{ src: "../assets/obstacles/rock_1.png", width: (canvas.width * 0.10), height: (canvas.height * 0.12) },
+		{ src: "../assets/obstacles/rock_2.png", width: (canvas.width * 0.11), height: (canvas.height * 0.13) },
+		{ src: "../assets/obstacles/sign_1.png", width: (canvas.width * 0.12), height: (canvas.height * 0.20) },
+		{ src: "../assets/obstacles/sign_2.png", width: (canvas.width * 0.12), height: (canvas.height * 0.20) },
+		{ src: "../assets/obstacles/small_tree.png", width: (canvas.width * 0.13), height: (canvas.height * 0.26) },
+		{ src: "../assets/obstacles/snowman.png", width: (canvas.width * 0.085), height: (canvas.height * 0.20) },
+		{ src: "../assets/obstacles/tree_1.png", width: (canvas.width * 0.15), height: (canvas.height * 0.32) },
 
 	];
 	return obstacle_assets[Math.floor(Math.random() * obstacle_assets.length)];
 }
 
+export function pick_items(){
+	let items = [
+			"../assets/items/apple.png",
+			"../assets/items/chocolate_bar.png",
+			"../assets/items/coin.png",
+			"../assets/items/cola.png",
+			"../assets/items/medkit.png",
+			"../assets/items/mini_snowman.png",
+			"../assets/items/muffin.png",
+			"../assets/items/pet_rock.png",
+			"../assets/items/pizza.png",
+			"../assets/items/goggles.png",
+			"../assets/items/sandwich.png",
+			"../assets/items/snowball.png",
+		];
+	let choice_1 = items[Math.floor(Math.random() * items.length)]
+	let choice_2 = items[Math.floor(Math.random() * items.length)]
+	return [choice_1,choice_2]
+}
 //  done?
 export function obstacle_generator(difficulty,score,player,loaded_obstacles){
 	// Temp
@@ -70,29 +89,32 @@ export function obstacle_generator(difficulty,score,player,loaded_obstacles){
 	// Randomly generate obstacles, that scale with score and difficulty, and then completes the checks to see if any bump into each other
 	let obstacle_count
 	let obstacles = []
+	let luck_factor = Math.max(1, player.obstacle_luck + 1)
+	// prevents divide-by-zero and keeps scaling clean
 	if (difficulty === "blizzard"){
-		// Hard difficulty
-		obstacle_count = Math.floor(Math.random()*(score*0.06)+3)
+		obstacle_count = Math.floor(Math.random()*(score*0.06)/luck_factor + 3);
 	}else if (difficulty === "flurry"){
-		// Medium difficulty
-		obstacle_count = Math.floor(Math.random()*(score*0.04)+2)
+		obstacle_count = Math.floor(Math.random()*(score*0.04)/luck_factor + 2);
 	}else{
-		obstacle_count = Math.floor(Math.random()*(score*0.02)+1)
+		obstacle_count = Math.floor(Math.random()*(score*0.02)/luck_factor + 1);
 	}
 	for (let i= 0;i < obstacle_count+1;i++){
 		let placed_object_bool = false
 		let attempts = 0
 		while (placed_object_bool === false && attempts < 50){
-			// Math.random() * (canvas.width - 50);
+			attempts++;
 			let obstacle = pick_obstacle()
 			let radius = Math.max(obstacle.width, obstacle.height) * 0.5
-			let obstacle_X = Math.random()*canvas.width
-			let obstacle_Y = (Math.random()*canvas.height)+canvas.height
+			let obstacle_x = (player.x - ((canvas.width * 1.6) / 2)) + (Math.random() *  (canvas.width * 1.6))
+			let obstacle_y = player.y + canvas.height + (Math.random() * canvas.height)
+			let obstacle_center_x = (obstacle_x + (obstacle.width / 2))
+			let obstacle_center_y = (obstacle_y + (obstacle.height / 2))
 			let obstacle_colliosn = obstacles.some(loop_obstacle_ => {
-				return check_obstacle_collion(loop_obstacle_.x,loop_obstacle_.y,loop_obstacle_.radius,obstacle_X,obstacle_Y,radius)
+				return check_obstacle_collion(loop_obstacle_.x + (loop_obstacle_.width / 2),loop_obstacle_.y + (loop_obstacle_.height / 2),loop_obstacle_.radius,(obstacle_x + (obstacle.width / 2)),(obstacle_y + (obstacle.height / 2)),radius)
 			}) 
 			if (!obstacle_colliosn){
-				obstacles.push(new Obstacle(obstacle_X, obstacle_Y,obstacle.src,obstacle.width,obstacle.height,radius,obstacle,loaded_obstacles[obstacle]));
+				const matched_image = loaded_obstacles.find(img => img && img.src.endsWith(obstacle.src.split('/').pop()));
+				obstacles.push(new Obstacle(obstacle_x, obstacle_y, obstacle.src, obstacle.width, obstacle.height, radius, obstacle, matched_image));
 				placed_object_bool = true
 			}
 		
@@ -107,72 +129,22 @@ export function obstacle_generator(difficulty,score,player,loaded_obstacles){
 
 // Undone
 export function collision_detection(player, obstacle){ 
-    if (player.x === obstacle.x && player.y === obstacle.y && player.life_item_bool === false){
-        return "dead";
-    } 
-    else if (player.x === obstacle.x && player.y === obstacle.y && player.life_item_bool === true){
-        return "saved";
+    const dx = player.x - (obstacle.x + (obstacle.size_x / 2))
+    const dy = player.y - (obstacle.y + (obstacle.size_y / 2))
+    const collision_radius =(player.radius || Math.min(canvas.width, canvas.height) * 0.017) +(ski_calculate(player) * 0.65 + canvas.width * 0.006)
+    const obstacle_radius = (obstacle.radius || Math.max(obstacle.size_x, obstacle.size_y) * 0.5) * 0.55
+    const distance = Math.hypot(dx, dy);
+    if (distance < collision_radius + obstacle_radius) {
+        if (!player.life_boolean || player.life_boolean === false) {
+            return "dead";
+        } else {
+            player.life_boolean = false;
+            console.log("Saved by life item!");
+            return "saved";
+        }
     }
 }
 
-
-// Mostly done
-export function item_selection_menu(player_item_dict){
-	/** Displays the item selection menu during the game (in the core game)
-
-    Args:
-		username (str*) :  The current items of the player
-
-    Returns:
-        Selected item (str)
-	*/
-
-	// Getting canvas
-	canvas = document.getElementById("game_window")
-	console.log(canvas)
-	ctx = canvas.getContext("2d")
-	
-
-
-	// Display the item selection menu, allowing the player to choose which items to 
-
-	//Draw a grey round rectangle as the background for the item selection menu
-	// It will leave a border around the edge of the canvas (to see score and the items) and be centered 
-	ctx.fillStyle = "#343a40";
-	ctx.font = '40px "Jersey 10"';
-	ctx.beginPath();
-	ctx.roundRect(canvas.width * 0.05, canvas.height * 0.05, canvas.width * 0.9, canvas.height * 0.9, 20);
-	ctx.fill();
-	// Display the 2 potential items and their descriptions, rarity and icons
-	
-	for(let i;i<2;i++){
-		let random_num = Math.floor(Math.random() * items.length)
-		ctx.fillStyle = "white"; // White
-		// Name
-		ctx.fillText(item_dict[random_num].fetch_name(),canvas.width / 4,canvas.height * 0.1)
-		// Description
-		ctx.fillText(item_dict[random_num].fetch_description(),canvas.width / 4,canvas.height * 0.1)
-		// Url for image
-		let url = [random_num].fetch_url()
-		// Create image
-		
-	}
-	
-	// Display text to display the skip option, what to press to fill the slot and the OR seperator to make it clear to the user that its a choice.
-	let random_slot_1 = Math.floor(Math.random() * 5)+1
-	let random_slot_2 = Math.floor(Math.random() * 5)+1
-	ctx.fillStyle = "white"; // Reset back to white for the info
-	ctx.fillText(`Press Q to fill slot ${random_slot_1}`, canvas.width / 2, canvas.height * 0.1);
-	ctx.fillText("OR", canvas.width / 2, canvas.height * 0.5);
-	ctx.fillText(`Press E to fill slot ${random_slot_2}`, canvas.width / 2, canvas.height * 0.9);
-	ctx.fillText("Press L to Pass",canvas.width / 2, canvas.height * 0.8)
-
-	if (action === 'slotQ' || action === 'slotE' || action === 'pass') {
-		return { next_state: 'game' };
-	}
-
-	return {next_state : 'item_menu' };
-}
 
 // Changed line of thinking for effiency, will instead move the screen for it to make relative sense
 
@@ -186,77 +158,93 @@ export function handle_spawning(difficulty, score, player,loaded_obs) {
 	return []
 }
 
-export function item_menu_timer(score,player) {
-	if (player_score_change = true){
-		
-	}
-    if (score % 500) { // every ~2 mins 
-        item_selection_menu()
-    }
-}
-
 // Player Functions
 
 
 export function ski_calculate(player){
 	// Fix ranges to relfect actual
 	let player_angle = player.get_angle()
-	// Convert to radians (just got tested on this in maths lol)
-	const rad = player_angle * Math.PI / 180;
-	let ski_seperation = Math.abs(Math.sin(rad));
+	let ski_seperation = Math.abs(Math.sin(player_angle));
 	// Just got lucky (put 20 px in and it made my code work so converted to width measurement so if aint broke dont fix it)
-	return ski_seperation+canvas.width * 0.01
+	return (ski_seperation * 0.75) + canvas.width * 0.008
 }
 
-export function move(player,key,camera){
+export function move(player,camera,pressedKeys){
 	// Ai + Marcel + Miles helped create this system, when discussing best practice optimising as well as the best movement option.
-	if (key === "a"){
-		player.turn_velocity -= player.turn_acceleration
+	// Redone from orignal cause it didnt work and was awful to use
+	let steer = 0;
+	if (pressedKeys?.has("ArrowLeft") || pressedKeys?.has("a") || pressedKeys?.has("A")){
+		steer -= 1	
 	}
-	else if (key ==="d"){
-		player.turn_velocity += player.turn_acceleration
+	if (pressedKeys?.has("ArrowRight") || pressedKeys?.has("d") || pressedKeys?.has("D")){
+		steer += 1
 	}
-	//Apply friction (smooth decay) 
-    player.turn_velocity *= player.friction
+	// Turning
+	player.turn_velocity += steer * player.turn_acceleration * (0.5 + player.speed * 0.02);
+    player.turn_velocity *= player.friction;
 
-    // Clamp turning speed (ensure that it doesnt go over the velocity set)
-    if (player.turn_velocity > player.max_turn_velocity) player.turn_velocity = player.max_turn_velocity;
-    if (player.turn_velocity < -player.max_turn_velocity) player.turn_velocity = -player.max_turn_velocity;
+    // clamp turn velocity
+    if (player.turn_velocity > player.max_turn_velocity){
+		player.turn_velocity = player.max_turn_velocity;
+	}
+    if (player.turn_velocity < -player.max_turn_velocity){
+		player.turn_velocity = -player.max_turn_velocity
+	} 
 
-    //Apply rotation to the player angle
-	player.character_angle += player.turn_velocity
-	const maxAngle = Math.PI / 4;
+    player.heading += player.turn_velocity;
 
-	if (player.character_angle > maxAngle) player.character_angle = maxAngle;
-	if (player.character_angle < -maxAngle) player.character_angle = -maxAngle;
+	// Keep the heading within the range of -π to π (-90 degrees to 90 degrees)
+	const downhill = Math.PI / 2;
+   	let relative = Math.max(-0.8, Math.min(0.8,( player.heading - downhill)));
+    player.heading = downhill + relative;
+	// Speed update
+	player.speed += player.acceleration;
+	const carve = Math.abs(relative);
+	player.speed -= carve * carve * 0.08;
+	player.speed = Math.max(0, player.speed);
+	player.speed *= player.drag;
+	player.speed = Math.min(player.speed, player.maxSpeed);
+	// Edge grip and movement + velocity 
+	player.edge_grip = Math.min(0.3, 0.08 + player.speed * 0.01);
+    const targetVX = Math.cos(player.heading) * player.speed;
+    const targetVY = Math.sin(player.heading) * player.speed;
 
-    // Move the camera through the world using trig functions
-    let horizontal_change = Math.sin(player.character_angle) * player.base_speed
-    let vertical_change = -Math.cos(player.character_angle) * player.base_speed
-    camera.x += horizontal_change
-    camera.y += vertical_change
+    player.vx += (targetVX - player.vx) * player.edge_grip;
+    player.vy += (targetVY - player.vy) * player.edge_grip;
+	// Player, move and change 
+	player.x += player.vx;
+	player.y += player.vy;
+	player.position = [player.x, player.y];
+	player.character_angle = player.heading - downhill;
+	player.lean += (relative - player.lean) * 0.2;
+	//Move Camera
+	camera.x = player.x - (canvas.width / 2);
+	camera.y = player.y - (canvas.height / 2);
 }
 
 // Done 
-export function trail(previous_coords_array,new_coords,camera){
-   	let trail_radius = 5
+export function trail(previous_coords_array,new_coords,ski_separation,camera,trail_angle) {
+	let trail_radius = 5
 	let coords_array = previous_coords_array
-	coords_array.unshift(new_coords)
-	if (coords_array.length>=80){
+	coords_array.unshift([new_coords[0], new_coords[1]]);
+	if (coords_array.length >= 400){
 		coords_array.pop()
 	}
+	const sideways_x = Math.cos(trail_angle + Math.PI / 2)
+	const sideways_y = Math.sin(trail_angle + Math.PI / 2)
+
 	for (let i = 0; i < coords_array.length; i++) {
 		let current_array_x = coords_array[i][0];
 		let current_array_y = coords_array[i][1];
+		let transperncy = Math.max(0, 1 - i * 0.03);
 		ctx.beginPath();
-		let seperation = 20
- 		let transperncy = 1-i*0.03
-		ctx.fillStyle = `rgba(198, 236, 249, ${transperncy})`;
-		ctx.arc(current_array_x - seperation - camera.x, current_array_y - camera.y, trail_radius, 0, 2 * Math.PI);
+		ctx.fillStyle = `rgba(255, 255, 255, ${transperncy})`
+		// First Circle
+		ctx.arc((current_array_x - camera.x) - (sideways_x * ski_separation), (current_array_y - camera.y) - (sideways_y * ski_separation), trail_radius, 0, 2 * Math.PI);
 		ctx.fill();
 		// Second Circle
 		ctx.beginPath();
-		ctx.arc(current_array_x+seperation - camera.x, current_array_y - camera.y, trail_radius, 0, 2 * Math.PI);
+		ctx.arc((current_array_x - camera.x) + (sideways_x * ski_separation), (current_array_y - camera.y) + (sideways_y * ski_separation), trail_radius, 0, 2 * Math.PI);
 		ctx.fill();
 	}
 	return coords_array
@@ -271,26 +259,28 @@ export function screen_draw(obstacles,loaded_obstacles,camera){
 	let background_color = "#dde7f0"
 	ctx.fillStyle = background_color;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-    for (let obstacle of obstacles) {
+	for (let obstacle of obstacles) {
         // Skip if off‑screen
         if ((obstacle.y - camera.y) > canvas.height || (obstacle.y - camera.y) + obstacle.height < 0){
-			continue;
+			continue
 		} 
         if ((obstacle.x - camera.x) > canvas.width || (obstacle.x - camera.x) + obstacle.width < 0){
-			continue;
+			continue
 		}
 		obstacle.img = obstacle.image || obstacle.img;
-		if (obstacle.img) {
-			ctx.drawImage(obstacle.img, (obstacle.x - camera.x), (obstacle.y - camera.y), obstacle.width, obstacle.height);
+		const draw_width = obstacle.width || obstacle.size_x || 0;
+		const draw_height = obstacle.height || obstacle.size_y || 0;
+		if (obstacle.img && draw_width && draw_height) {
+			ctx.drawImage(obstacle.img, (obstacle.x - camera.x), (obstacle.y - camera.y), draw_width, draw_height);
 		}
-    }
+	}
 }
 
 
-export function character_draw(sprite,player_angle,ski_seperation) {
+export function character_draw(sprite) {
     const canvas = document.getElementById("game_window");
     const ctx = canvas.getContext("2d");
-	ctx.drawImage(sprite,(canvas.width/ 2)-(canvas.width * 0.12)/ 2,(canvas.height /2) -(canvas.height * 0.30) / 2,(canvas.width * 0.12), (canvas.height * 0.30))
+	ctx.drawImage(sprite,(canvas.width / 2) - ((canvas.width * 0.09) / 2),(canvas.height / 2) - ((canvas.height * 0.22) / 2),(canvas.width * 0.09), (canvas.height * 0.22))
 }
 
 
@@ -300,27 +290,27 @@ export function ski_draw(player_angle, ski_separation, turn_velocity) {
     const ctx = canvas.getContext("2d");
     ctx.save();
 	// Move to feet of player
-    ctx.translate(canvas.width / 2, (canvas.height / 2) + (canvas.height * 0.30) * 0.3);
+	ctx.translate(canvas.width / 2, (canvas.height / 2) + ((canvas.height * 0.22) * 0.26));
     ctx.rotate(player_angle);
     ctx.fillStyle = "red";
     //Left Ski
     ctx.beginPath();
     ctx.roundRect(
-        (-ski_separation - canvas.width * 0.12 * 0.06 / 2), 		// x
-		0,															// y
-        (canvas.width * 0.12 * 0.06),								 // width
-       ((canvas.height * 0.30) * 0.40)+(Math.max(0, -turn_velocity) * 120), //length
-        (canvas.width * 0.12 * 0.06* 0.4)								//radius
+		(-ski_separation - (canvas.width * 0.12 * 0.04) / 2), 				// x
+		0,																	// y
+		(canvas.width * 0.12 * 0.04),										 // width
+	   	((canvas.height * 0.22) * 0.40)+(Math.max(0, -turn_velocity) * 90), //length
+		((canvas.width * 0.12 * 0.04) * 0.4)									//radius
     );
     ctx.fill();
     //Right Ski
     ctx.beginPath();
     ctx.roundRect(
-        (+ski_separation - canvas.width * 0.12 * 0.06 / 2),         	 // x
-        0	,															// y
-       	(canvas.width * 0.12 * 0.06),									// width
-        ((canvas.height * 0.30) * 0.40) +(Math.max(0, turn_velocity) * 120),//length
-       	(canvas.width * 0.12 * 0.06* 0.4)								//radius
+		(+ski_separation - (canvas.width * 0.12 * 0.04) / 2),         	 	// x
+        0,																	// y
+		(canvas.width * 0.12 * 0.04),										// width
+		((canvas.height * 0.22) * 0.40) +(Math.max(0, turn_velocity) * 90),//length
+		((canvas.width * 0.12 * 0.04) * 0.4)								//radius
     );
     ctx.fill();
     ctx.restore();
