@@ -1,3 +1,4 @@
+let is_submitting = false;
 function password_test(message){
     // Fetching the length og the password for testing 
     const password_len_test = message.length 
@@ -16,7 +17,11 @@ function email_test(email){
     // It ensures the format of the email follows this : "____@__.__"
 }
 
-async function check(){
+export async function check(){
+    if (is_submitting){
+        return
+    }   // prevents double execution
+    is_submitting = true;
     // This firstly checks that the email contains a .com and an @ symbol
     let name_ = document.getElementById("name_").value
     let password = document.getElementById("password").value
@@ -26,9 +31,10 @@ async function check(){
     // The operand && will return true only if all values are true
     if (email_test(email) === true && password_test(password) === true){
         try {
+            console.log("Trying to sign up...")
             await sign_up(email, password)
             console.log("All valid values")
-            console.alert("Sign-up successful! You will now be redirected to the account page to log in.")
+            alert("Sign-up successful! You will now be redirected to the account page to log in.")
             window.location.href = "account.html"
         } catch (error) {
             console.error(error)
@@ -38,6 +44,7 @@ async function check(){
         // Alerts the user
         alert("A problem has occured, please ensure all values are valid.")
     }
+    is_submitting = false;
 }
 
 function show_password_toggle(){

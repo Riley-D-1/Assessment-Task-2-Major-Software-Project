@@ -75,14 +75,15 @@ async function get_user_highscore() {
 	return data[0]?.score || 0
 }
 
+
 // Save unlocked item URL
 async function save_item(item_url) {
 	/** Saves items to the external database system
 
-    Args:
-        item_url(str) : The image path prelavent in my game 
-    Returns:
-        N/a
+	Args:
+		item_url(str) : The image path prelavent in my game 
+	Returns:
+		N/a
 	*/
 	const { data: userData } = await supabaseClient.auth.getUser()
 
@@ -93,6 +94,7 @@ async function save_item(item_url) {
 	if (error) throw error
 }
 
+
 // Get all unlocked item URLs
 async function get_user_items() {
 	/** Gets all unlocked items
@@ -102,13 +104,22 @@ async function get_user_items() {
     Returns:
         unlocked_items(array of strings) : It's an array of the image paths for the items the logged item user has
 	*/
-	const { data: userData } = await supabaseClient.auth.getUser()
+    const { data: userData } = await supabaseClient.auth.getUser();
 
-	const { data, error } = await supabaseClient
-	.from('user_items')
-	.select('item_url')
-	.eq('user_id', userData.user.id)
+    const { data, error } = await supabaseClient
+        .from('user_items')
+        .select('item_url')
+        .eq('user_id', userData.user.id);
 
-	if (error) throw error
-	return data.map(item => item.item_url)
+    if (error) throw error;
+
+    let items = data.map(item => item.item_url);
+
+    // Always include medkit
+    if (!items.includes("items/medkit.png")) {
+        items.push("items/medkit.png");
+    }
+
+    return items;
 }
+

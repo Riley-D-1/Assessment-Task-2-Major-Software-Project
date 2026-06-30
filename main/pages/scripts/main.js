@@ -1,10 +1,8 @@
 // This is the main file which links all of the logic together in an appropiate game loop
 // Import from other files
-import { inbetween_menu, play_menu_music,end_screen,ui_draw } from "./ui.js";
+import { inbetween_menu,end_screen,ui_draw } from "./ui.js";
 import { handle_spawning, screen_draw, move, trail, character_draw, ski_calculate, ski_draw, check_obstacle_collion, collision_detection,pick_items} from "./game_logic.js";
 import { Character,item } from "./classes.js";
-
-
 // Set up the game with all of the relevant global variables
 // Yes this is a lot of global variables, but time constraints + procrastination lol
 let game_state = "menu";
@@ -25,15 +23,19 @@ let item_menu_result = null;
 let score_timer = 0;
 let next_item_score = 500 - 0; 
 let current_item_choices = [];
-// Get unlocked items from storage
-let unlocked_items = JSON.parse(sessionStorage.getItem("unlocked_items")) || ["../assets/items/medkit.png"];
+let saved_items = []
+let used_item = null
+let unlocked_list= []
 let previousTimeMs = 0;
 const MAX_FPS = 60;
 const FRAME_INTERVAL_MS = 1000 / MAX_FPS;
 const pressedKeys = new Set();
 let last_click = null;
 let starting_item = "../assets/items/medkit.png";
-//
+// Get unlocked items from session storage or set to default if not present
+let unlocked_items = JSON.parse(sessionStorage.getItem("unlocked_items")) || ["../assets/items/medkit.png"];
+let audio = new Audio();
+audio.volume = 1; // optional
 let player = new Character(0)
 // On load function (Runs the core game on load)
 
@@ -54,6 +56,49 @@ window.addEventListener("keyup", (e) => {
 });
 
 // General Functions
+
+function play_game_music() {
+    if (sessionStorage.getItem("audioReady")) {
+		audio.loop = false;
+		audio.pause();
+		audio.currentTime = 0;
+		audio.src = "";
+        audio.src = '../assets/music/game_music.mp3'
+        audio.load();
+        audio.play();
+    }
+}
+
+function play_menu_music(){
+	/** Plays music in the menus.
+
+    Args:
+        N/A
+
+    Returns:
+        N/a
+	*/
+	if (sessionStorage.getItem("audioReady")) {
+		audio.src = '../assets/music/menu_music.mp3';
+		audio.loop = true;
+		audio.volume = 1;
+		audio.play();
+		console.log("music playeing")
+	}
+}
+
+function play_death_music(){
+	/** Plays music when the player dies.
+	 */
+	if (sessionStorage.getItem("audioReady")) {
+		audio.pause();
+		audio.src = "";
+		audio.loop = false;
+		audio.currentTime = 0;
+		audio.src = '../assets/music/death.mp3';
+		audio.play();
+	}
+}
 
 function preload_obstacles(){
 	let obstacle_urls = [
@@ -126,18 +171,25 @@ function resizeGameCanvas() {
 window.addEventListener("resize", resizeGameCanvas);
 
 // Other Functions
-async function end_game(player_item_dict,unlocked_items){
-    for (const item_ of player_item_dict){
+async function end_game(player_item_dict, unlocked_items, saved_items) {
+    let all_items = [...player_item_dict, ...saved_items];
+    let unlocked_list = [];
+    for (const item_ of all_items) {
         const icon = item_.icon_path;
-        if (!unlocked_items.includes(icon)){
-            try{
+        if (!unlocked_items.includes(icon)) {
+            try {
+                console.log("Saving unlocked item: " + icon);
                 await save_item(icon);
-            }catch(error){
+                unlocked_list.push(icon);
+            } catch (error) {
+                console.log(error);
                 console.log("Error saving unlocked item");
             }
         }
     }
+    return unlocked_list;
 }
+
 
 
 // GAME LOOP
@@ -199,6 +251,7 @@ function update(currentTimeMs) {
 				if (collision_result === "dead") {
 					game_state = "end";
 					msg.style.display = "none";
+					play_death_music()
 					break;
 				}
 				if (collision_result === "saved") {
@@ -210,6 +263,8 @@ function update(currentTimeMs) {
 					// Remove the life item from inventory
 					const index = player.item_dict.findIndex(it => it.type === "life");
 					if (index !== -1){
+						used_item = player.item_dict[index];
+						saved_items.push(used_item);
 						player.item_dict.splice(index, 1);
 						
 					} 
@@ -240,12 +295,37 @@ function update(currentTimeMs) {
 		character_draw(player.return_sprite(), player.character_angle, ski_calculate(player));
 		requestAnimationFrame(update);
 	} else if (game_state === "end") {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		end_game(player.item_dict, unlocked_items);
-		end_screen(player.score, player.item_dict, obstacles_dodged);
-		return; 
-	}
+		(async () => {
+			// Check login status
+			const { data: userData } = await supabaseClient.auth.getUser();
+			const logged_in = !!userData?.user;
+			let high_score_ = 0;
+			let unlocked_list_ = [];
+			if (logged_in) {
+				console.log("User is logged in, fetching high score and unlocked items...");
+				high_score_ = await get_user_highscore();
+				unlocked_list_ = await end_game(player.item_dict, unlocked_items, saved_items);
+				if (player.score > high_score_) {
+					await save_highscore(player.score);
+					high_score_ = player.score;
+				}
 
+			} else {
+				// If not logged in, use localStorage for high score
+				high_score_ = parseInt(localStorage.getItem("high_score")) || 0;
+
+				if (player.score > high_score_) {
+					localStorage.setItem("high_score", player.score);
+					high_score_ = player.score;
+				}
+				unlocked_list_ = [...item_dict, ...saved_items]
+			}
+			end_screen(player.score, unlocked_list_, obstacles_dodged, high_score_);
+
+		})();
+
+		return;
+	}
 }
 	
 function main(){
@@ -264,7 +344,10 @@ function main(){
 
 	// Fetch user data 
 	let username = sessionStorage.getItem("username")
-	let unlocked_items = JSON.parse(sessionStorage.getItem('unlocked_items'));
+	unlocked_items = JSON.parse(sessionStorage.getItem("unlocked_items")) || [];
+	if (!unlocked_items.includes("../assets/items/medkit.png")) {
+		unlocked_items.unshift("../assets/items/medkit.png");
+	}
 
 	preload_obstacles()
 	preload_items()
@@ -272,6 +355,7 @@ function main(){
 	ctx.font = "40px 'Jersey 40'";
 	document.fonts.ready.then(() => {
 		game_state = "menu";
+		play_menu_music()
 		inbetween_menu(username, unlocked_items, difficulty, starting_item);
 	});
 
@@ -283,6 +367,11 @@ function handle_click(event) {
         x: event.clientX - rect.left,
         y: event.clientY - rect.top
     };
+	// Refresh unlocked items before menu logic
+	unlocked_items = JSON.parse(sessionStorage.getItem("unlocked_items")) || [];
+	if (!unlocked_items.includes("../assets/items/medkit.png")) {
+		unlocked_items.unshift("../assets/items/medkit.png");
+	}
 	if (game_state === "menu") {
 		const saved_difficulty = difficulty;
 		const saved_start_item = starting_item;
@@ -292,14 +381,16 @@ function handle_click(event) {
 		starting_item = menu_vars.starting_item;
 		game_state = menu_vars.game_state;
 		if (game_state === "game"){
-			player.add_item(starting_item);
+			sessionStorage.setItem("audioReady", "true");
+			play_game_music()
+			player.add_item(starting_item)
 			update(previousTimeMs = performance.now(),player)
 			game_state = "game"
 		}
 		// Only redraw if something changed
 		if (saved_start_item != starting_item || saved_difficulty != difficulty){
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-		inbetween_menu(username, unlocked_items,difficulty,starting_item);
+			inbetween_menu(username, unlocked_items,difficulty,starting_item);
 		}
 	}else if(game_state === "end" ){
 		// Main Menu button

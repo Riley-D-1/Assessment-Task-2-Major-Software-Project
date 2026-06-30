@@ -1,22 +1,5 @@
 // This file contains Menu related logic and UI related logic for the game
 import {item } from "./classes.js";
-export function play_menu_music(){
-	/** Plays music in the menus.
-
-    Args:
-        N/A
-
-    Returns:
-        N/a
-	*/
-	if (sessionStorage.getItem("audioReady")) {
-		let audio = new Audio('../assets/music/menu_music.mp3')
-		audio.loop = true;
-		audio.volume = 1;
-		audio.play();
-		console.log("music playeing")
-	}
-}
 
 
 export function inbetween_menu(username,unlocked_items,difficulty,starting_item){
@@ -163,7 +146,7 @@ export function inbetween_menu(username,unlocked_items,difficulty,starting_item)
 		img.onload = () => {
 			ctx.drawImage(img, temp_item.x, temp_item.y, temp_item.width, temp_item.height);
 
-			if (starting_item === temp_item.src) {
+			if (starting_item === temp_item.src && starting_item !== "../assets/items/locked_item.png") {
 				ctx.lineWidth = 5;
 				ctx.strokeStyle = "#000000";
 				ctx.strokeRect(temp_item.x - 2, temp_item.y - 2, temp_item.width + 4, temp_item.height + 4);
@@ -185,7 +168,9 @@ export function inbetween_menu(username,unlocked_items,difficulty,starting_item)
 		 	{
 				console.log(`Clicked inside ${item.src}`);
 				// Save item
-				starting_item = item.src;
+				if (item.src !== "../assets/items/locked_item.png") {
+					starting_item = item.src;
+				}
 				break;
 			
 			}
@@ -236,14 +221,14 @@ function menu_character_draw(x,y,width,height,current_sprite_dir,ctx){
 	});	
 }
 
-export function end_screen(score_,item_dict,obstacle_dodged){
+export function end_screen(score_,unlocked_list_,obstacle_dodged,high_score_){
 	/** Displays the end screen after death (in the core game)
 
     Args:
 		score (int) :  The final score of the player
-		item_dict (dict) :  The items collected by the player
+		unlocked_list_ (list) :  The list of unlocked items collected by the player
 		obstacle_dodged (int) :  The number of obstacles dodged by the player
-
+		high_score_ (int) :  The players high score
     Returns:
         N/A
 	*/
@@ -280,8 +265,81 @@ export function end_screen(score_,item_dict,obstacle_dodged){
 	ctx.fillText("Stastics",canvas.width * 0.5+(canvas.width * 0.45/2),canvas.height * 0.2)
 
 	//temp scores and stats
-	let high_score_ = parseInt(sessionStorage.getItem("high_score")) || 0;
-	let item_count = Object.keys(item_dict).length
+	let item_count = unlocked_list_.length;
+	const item_data_ = {
+		"../assets/items/medkit.png": {
+			name: "Medkit",
+			type: "life",
+			change: 1,
+			description: "Patch yourself up in case of a fall."
+		},
+		"../assets/items/snowball.png": {
+			name: "Snowball",
+			type: "life",
+			change: 1,
+			description: "The snowball should cushion your fall. Snow is soft right…?"
+		}, 
+		"../assets/items/pizza.png": {
+			name: "Pizza",
+			type: "life",
+			change: 1,
+			description: "Pizza is life! A hot slice of pizza is all you need to keep going."
+		},
+		"../assets/items/muffin.png": {
+			name: "Muffin",
+			type: "speed",
+			change: -0.5,
+			description: "Delicious... but unhealthy. You've been slowed down by obesity."
+		},
+		"../assets/items/goggles.png": {
+			name: "Goggles",
+			type: "speed",
+			change: 0.5,
+			description: "You can go faster without the wind in your eyes."
+		},
+		"../assets/items/chocolate_bar.png": {
+			name: "Chocolate Bar",
+			type: "speed",
+			change: 0.5,
+			description: "SUGAR BABY! Increase your speed."
+		},
+		"../assets/items/coin.png": {
+			name: "Coin",
+			type: "item_luck",
+			change: 1,
+			description: "Fancy some gambling? Flips a coin to double or remove your item chance."
+		},
+		"../assets/items/sandwich.png": {
+			name: "Sandwich",
+			type: "item_luck",
+			change: 1,
+			description: "A satisfying snack that sharpens your focus, allowing you to spot other items."
+		},
+		"../assets/items/apple.png": {
+			name: "Apple",
+			type: "obstacle_luck",
+			change: 1,
+			description: "An apple a day keeps the trees away… usually."
+		},
+		"../assets/items/pet_rock.png": {
+			name: "Pet Rock",
+			type: "obstacle_luck",
+			change: 1,
+			description: "A loyal little companion that somehow scares away some obstacles."
+		},
+		"../assets/items/cola.png": {
+			name: "Cola",
+			type: "score",
+			change: 10,
+			description: "A fizzy boost that sends your score soaring."
+		},
+		"../assets/items/mini_snowman.png": {
+			name: "Snowman",
+			type: "score",
+			change: 10,
+			description: "Cool under pressure, your frosty friend helps boost your score."
+		}
+	}
 	// Statistics
 	ctx.font = "50px 'Jersey 10'";
 	ctx.textAlign = "left";
@@ -291,19 +349,23 @@ export function end_screen(score_,item_dict,obstacle_dodged){
 	ctx.fillText(`Obstacles Dodged: ${obstacle_dodged}`, canvas.width * 0.51, canvas.height * 0.25);
 	ctx.fillText(`Items: ${item_count}`, canvas.width * 0.8, canvas.height * 0.25);	
 
-	ctx.textAlign = "center";
-	ctx.fillText("You've unlocked:",canvas.width * 0.69, canvas.height * 0.6)
+	ctx.fillText("You've found:", canvas.width * 0.5, canvas.height * 0.6);
 	// Draw unlocked items
-	for (let i = 0; i < Math.min(item_dict.length, 5); i++) {
-		const item = item_dict[i];
+	console.log("Unlocked items: ", unlocked_list_);
+	console.log(item_count)
+	const items_to_draw = unlocked_list_.map(path => item_data_[path]).filter(Boolean);     
+	for (let i = 0; i<Math.min(items_to_draw.length, 5); i++) {
+		const item = items_to_draw[i];
+		const path = unlocked_list_[i];
+		console.log("Drawing item:", item.name);
 		const icon = new Image();
-		icon.src = item.fetch_icon();
-		const x = canvas.width * 0.75 + i * ((canvas.width * 0.5) / 5);
+		icon.src = path;
+		const x = canvas.width * 0.6 + (canvas.width * 0.05) + i * (canvas.width * 0.06);
 		icon.onload = () => {
-			ctx.drawImage(icon, x, (canvas.height * 0.63), (canvas.width * 0.04), (canvas.width * 0.04));
+			ctx.drawImage(icon,x,canvas.height * 0.6 - (canvas.width * 0.02),canvas.width * 0.04,canvas.width * 0.04);
 		};
 	}
-	
+	ctx.textAlign = "center";
 	// Red Round Rectangle button (Return to menu)
 	ctx.strokeStyle = '#e03131';
 	ctx.fillStyle = "#e03131";

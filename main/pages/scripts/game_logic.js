@@ -9,22 +9,6 @@ let ctx = canvas.getContext("2d")
 // Apparently this works acrss files
 export let spawn_timer = 0
 
-function play_game_music(){
-	if (sessionStorage.getItem("audioReady")) {
-		audio.loop = false;
-		const game_music_urls = ['../assets/music/game_music_1.mp3','../assets/music/game_music_2.mp3']
-		audio.pause();
-		audio.src = game_music_urls[Math.floor(Math.random(game_music_urls))];
-		audio.load()
-		audio.play()
-		music.addEventListener('ended',function(){
-			audio.src = game_music_urls[Math.floor(Math.random(game_music_urls))];
-			audio.pause();
-			audio.load()
-			audio.play()
-		});
-	}
-}
 
 // Obstacle Functions 
 

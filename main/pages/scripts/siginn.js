@@ -3,7 +3,9 @@ async function check(){
     let password = document.getElementById("password").value
     try {
         await sign_in(email, password)
-        window.location.href = "results.html"
+        sessionStorage.setItem("username", email)
+        sessionStorage.setItem("unlocked_items",JSON.stringify(await get_user_items()))
+        window.location.href = "game.html"
     } catch (error) {
         console.error(error)
         alert("Sign-in failed. Please check your email and password. It also may be an issue with the server, if you think this is the case please open an issue on github.")
