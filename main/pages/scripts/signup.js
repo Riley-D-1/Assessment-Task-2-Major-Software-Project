@@ -17,7 +17,7 @@ function email_test(email){
     // It ensures the format of the email follows this : "____@__.__"
 }
 
-export async function check(){
+async function check(){
     if (is_submitting){
         return
     }   // prevents double execution
