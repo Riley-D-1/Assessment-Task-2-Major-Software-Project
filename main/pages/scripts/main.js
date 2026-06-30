@@ -114,8 +114,6 @@ function preload_items(){
 	}
 }
 
-
-
 function resizeGameCanvas() {
 	// Resize canvas 
     const canvas = document.getElementById("game_window");
@@ -182,13 +180,17 @@ function update(currentTimeMs) {
 				const random_icon = items[Math.floor(Math.random() * items.length)];
 				player.add_item(random_icon);
 				const added_item = player.item_dict[player.item_dict.length - 1];
-				alert(`You found a ${added_item.name}!`);
-				alert(`Description: ${added_item.description}`);
+				const msg = document.getElementById("msg");
+				msg.textContent = `You found "${added_item.name}"!`;
+				msg.style.display = "block";
+				msg.style.font = '20px "Jersey 10"';
+				setTimeout(() => {msg.textContent = added_item.description}, 2000);
+				setTimeout(() => {msg.style.display = "none"}, 5000);
 				document.getElementById("game_window").focus()
 				next_item_score += (500 - player.item_luck);
 			}
 			// Spawning
-			const newObstacles = handle_spawning(difficulty, player.score, player,loaded_obstacles);
+			const newObstacles = handle_spawning(difficulty, player.score, player,loaded_obstacles,obstacles);
 			obstacles.push(...newObstacles);
 			// Collision check
 			for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -196,13 +198,23 @@ function update(currentTimeMs) {
 				const collision_result = collision_detection(player, obs);
 				if (collision_result === "dead") {
 					game_state = "end";
+					msg.style.display = "none";
 					break;
 				}
 				if (collision_result === "saved") {
-					alert("Your life item saved you!");
+					const msg = document.getElementById("msg");
+					msg.textContent = "Your life item saved you!";
+					msg.style.display = "block";
+					setTimeout(() => msg.style.display = "none", 3000);
 					document.getElementById("game_window").focus()
 					// Remove the life item from inventory
-					player.item_dict = player.item_dict.filter(it => it.type !== "life");
+					const index = player.item_dict.findIndex(it => it.type === "life");
+					if (index !== -1){
+						player.item_dict.splice(index, 1);
+						
+					} 
+					// Reset boolean
+					player.life_boolean  = player.item_dict.some(it => it.type === "life");
 					// Remove the obstacle that hit the player
 					obstacles.splice(i, 1);
 					// Continue the game

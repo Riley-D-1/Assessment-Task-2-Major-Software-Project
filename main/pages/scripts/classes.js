@@ -49,7 +49,7 @@ const item_data = {
         name: "Sandwich",
         type: "item_luck",
         change: 1,
-        description: "A satisfying snack that sharpens your focus, allowing you to spot other items strewn across the slope."
+        description: "A satisfying snack that sharpens your focus, allowing you to spot other items."
     },
     "../assets/items/apple.png": {
         name: "Apple",
@@ -123,7 +123,7 @@ export class Character{
 			this.base_speed += new_item.change
 			this.sync_motion_stats();
 		}else if (new_item.type === "obstacle_luck"){
-			item_interval -= new_item.change
+			this.item_interval -= new_item.change
 		}else if (new_item.type === "item_luck"){
 			this.item_luck += new_item.change
 		}else if (new_item.type === "score"){

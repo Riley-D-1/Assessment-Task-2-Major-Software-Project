@@ -33,8 +33,9 @@ function play_game_music(){
 export function check_obstacle_collion(loop_obstacle_x,loop_obstacle_y,loop_obstacle_radius,obstacle_x,obstacle_y,obstacle_radius){
     let dx = loop_obstacle_x - obstacle_x
     let dy = loop_obstacle_y - obstacle_y
-    let distance = Math.sqrt(dx * dx + dy * dy)
-    return distance < (loop_obstacle_radius + obstacle_radius)
+	// OPtimised through removal of square root
+	return (dx*dx + dy*dy) < (loop_obstacle_radius + obstacle_radius) ** 2
+
 }
 
 
@@ -43,20 +44,19 @@ function pick_obstacle(){
 	const canvas = document.getElementById("game_window");
 	canvas.height
 	const obstacle_assets = [
-		{ src: "../assets/obstacles/big_tree_1.png", width: (canvas.width * 0.16), height: (canvas.height * 0.38) },
-		{ src: "../assets/obstacles/big_tree_2.png", width: (canvas.width * 0.15), height: (canvas.height * 0.36) },
-		{ src: "../assets/obstacles/bush_1.png", width: (canvas.width * 0.10), height: (canvas.height * 0.20) },
-		{ src: "../assets/obstacles/bush_2.png", width: (canvas.width * 0.11), height: (canvas.height * 0.21) },
-		{ src: "../assets/obstacles/log_1.png", width: (canvas.width * 0.16), height: (canvas.height * 0.18) },
-		{ src: "../assets/obstacles/log_2.png", width: (canvas.width * 0.15), height: (canvas.height * 0.17) },
-		{ src: "../assets/obstacles/rock_1.png", width: (canvas.width * 0.10), height: (canvas.height * 0.12) },
-		{ src: "../assets/obstacles/rock_2.png", width: (canvas.width * 0.11), height: (canvas.height * 0.13) },
-		{ src: "../assets/obstacles/sign_1.png", width: (canvas.width * 0.12), height: (canvas.height * 0.20) },
-		{ src: "../assets/obstacles/sign_2.png", width: (canvas.width * 0.12), height: (canvas.height * 0.20) },
-		{ src: "../assets/obstacles/small_tree.png", width: (canvas.width * 0.13), height: (canvas.height * 0.26) },
-		{ src: "../assets/obstacles/snowman.png", width: (canvas.width * 0.085), height: (canvas.height * 0.20) },
-		{ src: "../assets/obstacles/tree_1.png", width: (canvas.width * 0.15), height: (canvas.height * 0.32) },
-
+		{ src: "../assets/obstacles/big_tree_1.png", width: (canvas.width * 0.08), height: (canvas.height * 0.19) },
+		{ src: "../assets/obstacles/big_tree_2.png", width: (canvas.width * 0.075), height: (canvas.height * 0.18) },
+		{ src: "../assets/obstacles/bush_1.png", width: (canvas.width * 0.05), height: (canvas.height * 0.10) },
+		{ src: "../assets/obstacles/bush_2.png", width: (canvas.width * 0.055), height: (canvas.height * 0.105) },
+		{ src: "../assets/obstacles/log_1.png", width: (canvas.width * 0.08), height: (canvas.height * 0.09) },
+		{ src: "../assets/obstacles/log_2.png", width: (canvas.width * 0.075), height: (canvas.height * 0.085) },
+		{ src: "../assets/obstacles/rock_1.png", width: (canvas.width * 0.05), height: (canvas.height * 0.06) },
+		{ src: "../assets/obstacles/rock_2.png", width: (canvas.width * 0.055), height: (canvas.height * 0.065) },
+		{ src: "../assets/obstacles/sign_1.png", width: (canvas.width * 0.06), height: (canvas.height * 0.10) },
+		{ src: "../assets/obstacles/sign_2.png", width: (canvas.width * 0.06), height: (canvas.height * 0.10) },
+		{ src: "../assets/obstacles/small_tree.png", width: (canvas.width * 0.065), height: (canvas.height * 0.13) },
+		{ src: "../assets/obstacles/snowman.png", width: (canvas.width * 0.0425), height: (canvas.height * 0.10) },
+		{ src: "../assets/obstacles/tree_1.png", width: (canvas.width * 0.075), height: (canvas.height * 0.16) },
 	];
 	return obstacle_assets[Math.floor(Math.random() * obstacle_assets.length)];
 }
@@ -81,7 +81,7 @@ export function pick_items(){
 	return [choice_1,choice_2]
 }
 //  done?
-export function obstacle_generator(difficulty,score,player,loaded_obstacles){
+export function obstacle_generator(difficulty,score,player,loaded_obstacles,exisitng_obstacles){
 	// Temp
 	// canvas = document.getElementById("game_window")
 	// ctx = canvas.getContext("2d")
@@ -107,11 +107,11 @@ export function obstacle_generator(difficulty,score,player,loaded_obstacles){
 			let radius = Math.max(obstacle.width, obstacle.height) * 0.5
 			let obstacle_x = (player.x - ((canvas.width * 1.6) / 2)) + (Math.random() *  (canvas.width * 1.6))
 			let obstacle_y = player.y + canvas.height + (Math.random() * canvas.height)
-			let obstacle_center_x = (obstacle_x + (obstacle.width / 2))
-			let obstacle_center_y = (obstacle_y + (obstacle.height / 2))
-			let obstacle_colliosn = obstacles.some(loop_obstacle_ => {
-				return check_obstacle_collion(loop_obstacle_.x + (loop_obstacle_.width / 2),loop_obstacle_.y + (loop_obstacle_.height / 2),loop_obstacle_.radius,(obstacle_x + (obstacle.width / 2)),(obstacle_y + (obstacle.height / 2)),radius)
-			}) 
+			// let obstacle_center_x = (obstacle_x + (obstacle.width / 2))
+			// let obstacle_center_y = (obstacle_y + (obstacle.height / 2))
+			let obstacle_colliosn =
+				exisitng_obstacles.some(o =>check_obstacle_collion(o.x + o.width * 0.5,o.y + o.height * 0.5,Math.max(o.width, o.height) * 0.5,obstacle_x + obstacle.width * 0.5,obstacle_y + obstacle.height * 0.5,radius)) ||
+				obstacles.some(o =>check_obstacle_collion(o.x + o.width * 0.5,o.y + o.height * 0.5,Math.max(o.width, o.height) * 0.5,obstacle_x + obstacle.width * 0.5,	obstacle_y + obstacle.height * 0.5,	radius));
 			if (!obstacle_colliosn){
 				const matched_image = loaded_obstacles.find(img => img && img.src.endsWith(obstacle.src.split('/').pop()));
 				obstacles.push(new Obstacle(obstacle_x, obstacle_y, obstacle.src, obstacle.width, obstacle.height, radius, obstacle, matched_image));
@@ -148,10 +148,10 @@ export function collision_detection(player, obstacle){
 
 // Changed line of thinking for effiency, will instead move the screen for it to make relative sense
 
-export function handle_spawning(difficulty, score, player,loaded_obs) {
+export function handle_spawning(difficulty, score, player,loaded_ob,existing_obstacles) {
     spawn_timer++;
     if (spawn_timer > 60) { // every ~600 frames
-        let new_obstacles = obstacle_generator(difficulty, score, player,loaded_obs);
+        let new_obstacles = obstacle_generator(difficulty, score, player,loaded_ob,existing_obstacles);
         spawn_timer = 0;
 		return new_obstacles
     }
@@ -166,7 +166,7 @@ export function ski_calculate(player){
 	let player_angle = player.get_angle()
 	let ski_seperation = Math.abs(Math.sin(player_angle));
 	// Just got lucky (put 20 px in and it made my code work so converted to width measurement so if aint broke dont fix it)
-	return (ski_seperation * 0.75) + canvas.width * 0.008
+	return (ski_seperation * 0.375) + canvas.width * 0.004
 }
 
 export function move(player,camera,pressedKeys){
@@ -174,10 +174,10 @@ export function move(player,camera,pressedKeys){
 	// Redone from orignal cause it didnt work and was awful to use
 	let steer = 0;
 	if (pressedKeys?.has("ArrowLeft") || pressedKeys?.has("a") || pressedKeys?.has("A")){
-		steer -= 1	
+		steer += 1
 	}
 	if (pressedKeys?.has("ArrowRight") || pressedKeys?.has("d") || pressedKeys?.has("D")){
-		steer += 1
+		steer -= 1	
 	}
 	// Turning
 	player.turn_velocity += steer * player.turn_acceleration * (0.5 + player.speed * 0.02);
@@ -224,7 +224,7 @@ export function move(player,camera,pressedKeys){
 
 // Done 
 export function trail(previous_coords_array,new_coords,ski_separation,camera,trail_angle) {
-	let trail_radius = 5
+	let trail_radius = 2
 	let coords_array = previous_coords_array
 	coords_array.unshift([new_coords[0], new_coords[1]]);
 	if (coords_array.length >= 400){
@@ -280,7 +280,7 @@ export function screen_draw(obstacles,loaded_obstacles,camera){
 export function character_draw(sprite) {
     const canvas = document.getElementById("game_window");
     const ctx = canvas.getContext("2d");
-	ctx.drawImage(sprite,(canvas.width / 2) - ((canvas.width * 0.09) / 2),(canvas.height / 2) - ((canvas.height * 0.22) / 2),(canvas.width * 0.09), (canvas.height * 0.22))
+	ctx.drawImage(sprite,(canvas.width / 2) - ((canvas.width * 0.045) / 2),(canvas.height / 2) - (canvas.height * 0.11 / 2),canvas.width * 0.045,canvas.height * 0.11);
 }
 
 
@@ -290,27 +290,27 @@ export function ski_draw(player_angle, ski_separation, turn_velocity) {
     const ctx = canvas.getContext("2d");
     ctx.save();
 	// Move to feet of player
-	ctx.translate(canvas.width / 2, (canvas.height / 2) + ((canvas.height * 0.22) * 0.26));
+	ctx.translate(canvas.width / 2,(canvas.height / 2) + ((canvas.height * 0.11) * 0.26));
     ctx.rotate(player_angle);
     ctx.fillStyle = "red";
     //Left Ski
     ctx.beginPath();
-    ctx.roundRect(
-		(-ski_separation - (canvas.width * 0.12 * 0.04) / 2), 				// x
-		0,																	// y
-		(canvas.width * 0.12 * 0.04),										 // width
-	   	((canvas.height * 0.22) * 0.40)+(Math.max(0, -turn_velocity) * 90), //length
-		((canvas.width * 0.12 * 0.04) * 0.4)									//radius
+	ctx.roundRect(
+        (-ski_separation - (canvas.width * 0.12 * 0.02) / 2),				// x
+        0,																	 // y
+        (canvas.width * 0.12 * 0.02),										// width
+        ((canvas.height * 0.11) * 0.40) + (Math.max(0, -turn_velocity) * 45), // length
+        ((canvas.width * 0.12 * 0.02) * 0.4)								// radius
     );
     ctx.fill();
     //Right Ski
     ctx.beginPath();
-    ctx.roundRect(
-		(+ski_separation - (canvas.width * 0.12 * 0.04) / 2),         	 	// x
-        0,																	// y
-		(canvas.width * 0.12 * 0.04),										// width
-		((canvas.height * 0.22) * 0.40) +(Math.max(0, turn_velocity) * 90),//length
-		((canvas.width * 0.12 * 0.04) * 0.4)								//radius
+	ctx.roundRect(
+        (+ski_separation - (canvas.width * 0.12 * 0.02) / 2),				// x
+        0,															 		// y
+        (canvas.width * 0.12 * 0.02),								 		// width
+        ((canvas.height * 0.11) * 0.40) + (Math.max(0, turn_velocity) * 45), // length
+        ((canvas.width * 0.12 * 0.02) * 0.4)								// radius
     );
     ctx.fill();
     ctx.restore();
