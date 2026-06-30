@@ -3,10 +3,9 @@
 // const supabase_url = ''
 
 // Fetch from Vercel env variables in future.
-const publishable_key = process.env.SUPABASE_PUBLISHABLE_KEY; 
-const supabase_url = process.env.SUPABASE_URL; 
-const supabaseClient = supabase.createClient(supabase_url, publishable_key)
-
+const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anon_key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseClient = supabase.createClient(supabase_url, anon_key);
 // Disclosure:  AI was used to help me understand the documentation and employ it within my game as supabase is very confusing 
 
 // Sign-up method that requires email and password
