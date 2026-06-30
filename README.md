@@ -7,11 +7,5 @@ https://assessment-task-2-major-software.vercel.app/main/pages/main_menu.html
 Select your difficulty and starting item after logging in.
 Use "a"  and "d"  or the left and right arrow keys to steer yourself around the slope.
 
+### AVOID USING SIGIN SYSTEM (I have to manually reactivate it)
 
-
-
-
-
-
-#Credit:
-Credit to https://www.aleksandrhovhannisyan.com/blog/javascript-game-loop/ for my usage of their efficent gameloop

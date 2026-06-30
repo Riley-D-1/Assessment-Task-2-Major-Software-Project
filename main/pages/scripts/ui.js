@@ -204,7 +204,9 @@ export function inbetween_menu(username,unlocked_items,difficulty,starting_item)
 			game_state_ = "game"
 		}
 	}
+	// Reset window click
 	window.last_click = null;
+	// Return the driving menu values
 	return {
 		difficulty: selecrted_difficulty,
 		starting_item,
@@ -214,6 +216,7 @@ export function inbetween_menu(username,unlocked_items,difficulty,starting_item)
 }
 
 function menu_character_draw(x,y,width,height,current_sprite_dir,ctx){
+	// Draws the character on the menu screen
 	const image = new Image();
 	image.src = current_sprite_dir;
 	image.addEventListener("load", (e) => {
@@ -344,6 +347,7 @@ export function end_screen(score_,unlocked_list_,obstacle_dodged,high_score_){
 	ctx.font = "50px 'Jersey 10'";
 	ctx.textAlign = "left";
 	//+(canvas.width * 0.45/4)
+	// Draw the stats
 	ctx.fillText(`Score: ${score_}`, canvas.width * 0.8, canvas.height * 0.35);
 	ctx.fillText(`High Score: ${high_score_}`, canvas.width * 0.51, canvas.height * 0.35);
 	ctx.fillText(`Obstacles Dodged: ${obstacle_dodged}`, canvas.width * 0.51, canvas.height * 0.25);
@@ -352,7 +356,7 @@ export function end_screen(score_,unlocked_list_,obstacle_dodged,high_score_){
 	ctx.fillText("You've found:", canvas.width * 0.5, canvas.height * 0.6);
 	// Draw unlocked items
 	console.log("Unlocked items: ", unlocked_list_);
-	console.log(item_count)
+	// Filter the unlocked items to only include those that are in the item_data_ dictionary
 	const items_to_draw = unlocked_list_.map(path => item_data_[path]).filter(Boolean);     
 	for (let i = 0; i<Math.min(items_to_draw.length, 5); i++) {
 		const item = items_to_draw[i];
@@ -370,7 +374,7 @@ export function end_screen(score_,unlocked_list_,obstacle_dodged,high_score_){
 	ctx.strokeStyle = '#e03131';
 	ctx.fillStyle = "#e03131";
 	ctx.beginPath();
-
+	// The outside rectangle of the button
 	// X, y , width , height, rounding
 	ctx.roundRect(canvas.width * 0.78, canvas.height * 0.78, canvas.width * 0.2, canvas.height * 0.12, canvas.width * 0.015);
 	ctx.stroke()
@@ -387,7 +391,7 @@ export function end_screen(score_,unlocked_list_,obstacle_dodged,high_score_){
 }
 
 export function draw_item_bar(item_dict,loaded_items){
-	// Temp
+	// Definiing the constants
 	const canvas = document.getElementById("game_window");
 	let ctx = canvas.getContext("2d")
 	

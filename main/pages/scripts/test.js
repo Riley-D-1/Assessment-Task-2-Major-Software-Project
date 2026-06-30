@@ -152,7 +152,7 @@ if (test_button) {
 	test_button.addEventListener('click', () => {
 		console.log('Button was pressed!');
 		// Change as needed to whatever test function
-		obstacle_test()
+		trail_test()
 		
 	});
 }

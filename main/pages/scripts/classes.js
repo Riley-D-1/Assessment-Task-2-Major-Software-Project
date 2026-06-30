@@ -112,6 +112,7 @@ export class Character{
 	}
 
 	sync_motion_stats(){
+		// Sync up the motion stats if they are changed
 		this.maxSpeed = this.base_speed * 3.6;
 		this.acceleration = this.base_speed * 0.05;
 	}
