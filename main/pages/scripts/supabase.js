@@ -1,10 +1,6 @@
 // Initialisiation of the Supabase client with the provided URL and publishable key (will be imported from environment variables in future)
-// const publishable_key = ''
-// const supabase_url = ''
-
-// Fetch from Vercel env variables in future.
-const supabase_url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anon_key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9teGR1ZGRqcGxjd2Ntb3R1Z3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwODczNjksImV4cCI6MjA5MjY2MzM2OX0.b6PI52HrRzX8lmk_r34hDs-tyf2YdFfXYHcmCseUdy0'
+const supabase_url = 'https://omxduddjplcwcmotugyn.supabase.co'
 const supabaseClient = supabase.createClient(supabase_url, anon_key);
 // Disclosure:  AI was used to help me understand the documentation and employ it within my game as supabase is very confusing 
 
