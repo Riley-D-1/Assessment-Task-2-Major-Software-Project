@@ -28,7 +28,8 @@ async function check(){
         try {
             await sign_up(email, password)
             console.log("All valid values")
-            window.location.href = "results.html"
+            console.alert("Sign-up successful! You will now be redirected to the account page to log in.")
+            window.location.href = "account.html"
         } catch (error) {
             console.error(error)
             alert("Sign-up failed. Please check your email and password. It may also be an issue with the server.")

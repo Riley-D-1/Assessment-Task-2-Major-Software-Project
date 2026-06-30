@@ -1,5 +1,5 @@
 async function check(){
-    let name_ = document.getElementById("name_").value
+    let email = document.getElementById("email").value
     let password = document.getElementById("password").value
     try {
         await sign_in(email, password)
